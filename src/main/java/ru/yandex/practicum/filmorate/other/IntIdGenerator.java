@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class IntIdGenerator<T> {
 
-   public int generateId(Map<Integer, T> dataMap) {
+    public int generateId(Map<Integer, T> dataMap) {
         int Id = 0;
 
         if (!dataMap.isEmpty()) {
@@ -14,9 +14,7 @@ public class IntIdGenerator<T> {
                 }
             }
         }
-
         Id++;
-
         return Id;
     }
 

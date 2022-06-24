@@ -1,49 +1,53 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.other.Validator;
-import ru.yandex.practicum.filmorate.other.IntIdGenerator;
 
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
-public class FilmController {
-    private final Map<Integer, Film> filmsMap = new HashMap<>();
-    IntIdGenerator<Film> intIdGenerator = new IntIdGenerator<>();
+public class FilmController extends EntityController<Film> {
 
-    @GetMapping()
-    public ArrayList<Film> getAllFilms() {
-        return new ArrayList<>(filmsMap.values());
+    public FilmController() {
+        this.entityName = "Фильм";
     }
 
-    @PostMapping()
-    public ResponseEntity<Film> createFilm(@Valid @RequestBody Film film) {
-        Validator.validateFilm(film, " Фильм не создан.");
-        film.setId(intIdGenerator.generateId(filmsMap));
-        filmsMap.put(film.getId(), film);
-        log.info("Создан фильм с id. " + film.getId() + ". " + film);
-        return new ResponseEntity<>(film, HttpStatus.CREATED);
-    }
+    Set<String> allFilmsNameAndDate = new HashSet<>();
 
-    @PutMapping()
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        if (!filmsMap.containsKey(film.getId())) {
-            throw new ValidationException("Фильм с id " + film.getId() + " не найден. Фильм не обновлён.");
+    @Override
+    public void validateEntity(Film film, Boolean isUpdate, String conclusion) {
+        String excMsg = "";
+
+        if (film.getName().isEmpty() || film.getName().isBlank()) {
+            excMsg += "Название фильма не может быть пустым. ";
         }
-        Validator.validateFilm(film,  " Фильм не обновлён.");
-        filmsMap.put(film.getId(), film);
-        log.info("Фильм с id " + film.getId() + " обновлён. " + film);
-        return film;
+        if (film.getDescription().length() > 200) {
+            excMsg += "Максимальная длина описания — 200 символов. ";
+        }
+        if (!film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 27))) {
+            excMsg += "Дата релиза — " + film.getReleaseDate() + " не должна быть раньше 28 декабря 1895 года. ";
+        }
+        if (film.getDuration() <= 0) {
+            excMsg += "Продолжительность фильма должна быть больше 0. ";
+        }
+        // если фильм с такой же датой существует и не происходит обновление, выбросить исключение
+        // если же происходит обновление названия или года выпуска, то нужно удалить старую запись из списка
+        if (allFilmsNameAndDate.contains(film.getName() + ";" + film.getReleaseDate()) & !isUpdate) {
+            excMsg += "Фильм с названием — " + film.getName() + " и с датой выпуска " + film.getReleaseDate() + " уже есть в базе. ";
+        } else if (allFilmsNameAndDate.contains(film.getName() + ";" + film.getReleaseDate()) & isUpdate) {
+            allFilmsNameAndDate.remove(film.getName() + ";" + film.getReleaseDate());
+        }
+        if (excMsg.length() > 0) {
+            log.warn("Ошибка валидации фильма. " + excMsg + conclusion);
+            throw new ValidationException(excMsg + conclusion);
+        }
+        allFilmsNameAndDate.add(film.getName() + ";" + film.getReleaseDate());
     }
-
 }

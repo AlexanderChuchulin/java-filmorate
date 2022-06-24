@@ -1,52 +1,57 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.other.IntIdGenerator;
-import ru.yandex.practicum.filmorate.other.Validator;
 
-import javax.validation.Valid;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
-public class UserController {
-    private final Map<Integer, User> usersMap = new HashMap<>();
-    IntIdGenerator<User> intIdGenerator = new IntIdGenerator<>();
+public class UserController extends EntityController<User> {
 
-    @GetMapping()
-    public ArrayList<User> getAllUsers() {
-        return new ArrayList<>(usersMap.values());
+    public UserController() {
+        this.entityName = "Пользователь";
     }
 
-    @PostMapping()
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        Validator.validateUser(user, " Пользователь не создан.");
-        user.setId(intIdGenerator.generateId(usersMap));
-        if(user.getName().isEmpty()) {
+    Map<String, String> allUsersLoginAndEmail = new HashMap<>();
+
+    @Override
+    public void validateEntity(User user, Boolean isUpdate, String conclusion) {
+        String excMsg = "";
+
+        if (user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
-        usersMap.put(user.getId(), user);
-        log.info("Создан пользователь с id. " + user.getId() + ". " + user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
-    }
-
-    @PutMapping()
-    public User updateUser(@Valid @RequestBody User user) {
-        if (!usersMap.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь с id " + user.getId() + " не найден. Пользователь не обновлён.");
+        if (!user.getEmail().contains("@") || !user.getEmail().contains(".")) {
+            excMsg += "Неверный формат электронной почты. ";
         }
-        Validator.validateUser(user,  " Пользователь не обновлён.");
-        usersMap.put(user.getId(), user);
-        log.info("Пользователь с id " + user.getId() + " обновлён. " + user);
-        return user;
+        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+            excMsg += "Логин не может быть пустым и содержать пробелы. ";
+        }
+        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
+            excMsg += "Дата рождения — " + user.getBirthday() + " должна быть раньше текущей даты " + LocalDate.now() + ". ";
+        }
+        //если пользователь с таким e-mail существует и не происходит обновление, выбросить исключение
+        if (allUsersLoginAndEmail.containsValue(user.getEmail()) & !isUpdate) {
+            excMsg += "Пользователь с e-mail " + user.getEmail() + " уже зарегистрирован. ";
+        }
+        // если пользователь с таким логином существует и не происходит обновление, выбросить исключение
+        // если же происходит обновление логина, то нужно удалить старую запись из таблицы логинов-e-mail
+        if (allUsersLoginAndEmail.containsKey(user.getLogin()) & !isUpdate) {
+            excMsg += "Пользователь с логином " + user.getLogin() + " уже зарегистрирован. ";
+        } else if (allUsersLoginAndEmail.containsKey(user.getLogin()) & isUpdate) {
+            allUsersLoginAndEmail.remove(user.getLogin());
+        }
+        if (excMsg.length() > 0) {
+            log.warn("Ошибка валидации пользователя. " + excMsg + conclusion);
+            throw new ValidationException(excMsg + conclusion);
+        }
+        allUsersLoginAndEmail.put(user.getLogin(), user.getEmail());
     }
-
 }
