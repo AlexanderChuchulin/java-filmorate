@@ -15,8 +15,8 @@ import java.util.Map;
 
 @Slf4j
 public abstract class EntityController<T extends Entity> {
-    final Map<Integer, T> entityMap = new HashMap<>();
-    IntIdGenerator<T> intIdGenerator = new IntIdGenerator<>();
+    private final Map<Integer, T> entityMap = new HashMap<>();
+    private final IntIdGenerator<T> intIdGenerator = new IntIdGenerator<>();
     String entityName;
 
     public EntityController() {

@@ -101,7 +101,7 @@ class FilmorateApplicationTests {
         assertThrows(ValidationException.class, () -> userController.createEntity(finalFailUser1),
                 "При попытке создать пользователя с пустым e-mail не выброшено исключение");
 
-        userEmail = "e-Mail@WrongFormat";
+        userEmail = "e-Ma.il@WrongFormat";
         userLogin = "loginUser3";
         userName = "nameUser3";
         userBirthDate = LocalDate.of(2003, 3, 3);

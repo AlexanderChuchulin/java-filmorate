@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @RestController
@@ -21,6 +23,7 @@ public class UserController extends EntityController<User> {
 
     Map<String, String> allUsersLoginAndEmail = new HashMap<>();
 
+
     @Override
     public void validateEntity(User user, Boolean isUpdate, String conclusion) {
         String excMsg = "";
@@ -28,8 +31,10 @@ public class UserController extends EntityController<User> {
         if (user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
-        if (!user.getEmail().contains("@") || !user.getEmail().contains(".")) {
-            excMsg += "Неверный формат электронной почты. ";
+        if (user.getEmail().isEmpty()) {
+            excMsg += "Адрес электронной почты не может быть пустым. ";
+        } else if (!Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE).matcher(user.getEmail()).find()) {
+            excMsg += "Неверный формат электронной почты " + user.getEmail() + ". ";
         }
         if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
             excMsg += "Логин не может быть пустым и содержать пробелы. ";
