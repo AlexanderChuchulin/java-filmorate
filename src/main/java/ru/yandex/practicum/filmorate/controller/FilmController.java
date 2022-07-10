@@ -1,53 +1,39 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
-@Slf4j
+@Component
 @RestController
 @RequestMapping("/films")
-public class FilmController extends EntityController<Film> {
+public class FilmController extends StorageController<Film> {
+    FilmService filmService;
 
-    public FilmController() {
-        this.entityName = "Фильм";
+    @Autowired
+    protected FilmController(InMemoryFilmStorage inMemoryFilmStorage, FilmService filmService) {
+        super(inMemoryFilmStorage);
+        this.filmService = filmService;
     }
 
-    Set<String> allFilmsNameAndDate = new HashSet<>();
-
-    @Override
-    public void validateEntity(Film film, Boolean isUpdate, String conclusion) {
-        String excMsg = "";
-
-        if (film.getName().isEmpty() || film.getName().isBlank()) {
-            excMsg += "Название фильма не может быть пустым. ";
-        }
-        if (film.getDescription().length() > 200) {
-            excMsg += "Максимальная длина описания — 200 символов. ";
-        }
-        if (!film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 27))) {
-            excMsg += "Дата релиза — " + film.getReleaseDate() + " не должна быть раньше 28 декабря 1895 года. ";
-        }
-        if (film.getDuration() <= 0) {
-            excMsg += "Продолжительность фильма должна быть больше 0. ";
-        }
-        // если фильм с такой же датой существует и не происходит обновление, выбросить исключение
-        // если же происходит обновление названия или года выпуска, то нужно удалить старую запись из списка
-        if (allFilmsNameAndDate.contains(film.getName() + ";" + film.getReleaseDate()) & !isUpdate) {
-            excMsg += "Фильм с названием — " + film.getName() + " и с датой выпуска " + film.getReleaseDate() + " уже есть в базе. ";
-        } else if (allFilmsNameAndDate.contains(film.getName() + ";" + film.getReleaseDate()) & isUpdate) {
-            allFilmsNameAndDate.remove(film.getName() + ";" + film.getReleaseDate());
-        }
-        if (excMsg.length() > 0) {
-            log.warn("Ошибка валидации фильма. " + excMsg + conclusion);
-            throw new ValidationException(excMsg + conclusion);
-        }
-        allFilmsNameAndDate.add(film.getName() + ";" + film.getReleaseDate());
+    @PutMapping("/{filmId}/like/{userId}")
+    void addFilmLike(@PathVariable int filmId, @PathVariable int userId) {
+        inMemoryEntityStorage.addConnection(filmId, userId);
     }
+
+    @DeleteMapping("/{filmId}/like/{userId}")
+    void removeFilmLike(@PathVariable int filmId, @PathVariable int userId) {
+        inMemoryEntityStorage.removeConnection(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    Collection<Film> getTopFilms(@RequestParam(required = false) int count) {
+        return filmService.getTopFilms(count);
+    }
+
 }
