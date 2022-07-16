@@ -26,10 +26,10 @@ public interface EntityStorage<T extends Entity> {
     ArrayList<T> getAllEntity();
 
     // Метод добавляет связь между объектами по id
-    void addConnection(int parentId, int childId);
+    void addConnection(int parentId, int childId, boolean isMutual);
 
     // Метод удаляет связь между объектами по id
-    void removeConnection(int parentId, int childId);
+    void removeConnection(int parentId, int childId, boolean isMutual);
 
     // Метод генерирует id для создаваемого объекта
     int generateId();

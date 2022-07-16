@@ -7,6 +7,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
+import java.util.ArrayList;
+
 @Component
 @RestController
 @RequestMapping("/users")
@@ -21,22 +23,22 @@ public class UserController extends StorageController<User> {
 
     @PutMapping("/{userId}/friends/{friendId}")
     void addFriend(@PathVariable int userId, @PathVariable int friendId) {
-        inMemoryEntityStorage.addConnection(userId, friendId);
+        inMemoryEntityStorage.addConnection(userId, friendId, true);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     void removeFriend(@PathVariable int userId, @PathVariable int friendId) {
-        inMemoryEntityStorage.removeConnection(userId, friendId);
+        inMemoryEntityStorage.removeConnection(userId, friendId, true);
     }
 
     @GetMapping("/{userId}/friends")
-    void getAllFriends(@PathVariable int userId) {
-        userService.getAllFriends(userId);
+    ArrayList<User> getAllFriends(@PathVariable int userId) {
+        return userService.getAllFriends(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherUserId}")
-    void getCommonFriends(@PathVariable int userId, @PathVariable int otherUserId) {
-        userService.getCommonFriends(userId,otherUserId);
+    ArrayList<User> getCommonFriends(@PathVariable int userId, @PathVariable int otherUserId) {
+        return userService.getCommonFriends(userId,otherUserId);
     }
 
 

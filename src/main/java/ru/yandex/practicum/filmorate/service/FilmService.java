@@ -7,6 +7,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
@@ -20,39 +22,20 @@ public class FilmService {
     }
 
     // Метод возвращает список фильмов заданного размера с наибольшим количестворм лайков
-    public Collection<Film> getTopFilms(int count) {
-        if(inMemoryFilmStorage.getConnectionsMap().isEmpty()) {
-            return null;
-        }
+    public List<Film> getTopFilms(int count) {
+        List<Film> topFilmsList;
+
         if (count == 0) {
             count = 10;
         }
 
-        List<Film> filmsLikeList = new ArrayList<>();
+        topFilmsList = inMemoryFilmStorage.getConnectionsMap().entrySet().stream()
+                .sorted((e1, e2) -> (e1.getValue().size() - e2.getValue().size()) * -1).limit(count)
+                .map(Map.Entry::getKey)
+                .map(inMemoryFilmStorage.getEntityMap()::get)
+                .collect(Collectors.toList());
 
-        Comparator comparator = new Comparator<Map.Entry<Film, Integer>>() {
-            @Override
-            public int compare(Map.Entry<Film, Integer> e1, Map.Entry<Film, Integer> e2) {
-                return e1.getValue().compareTo(e2.getValue());
-            }
-        };
-
-        Map<Film, Integer> filmsLikeMap = new TreeMap<Film, Integer>(comparator);
-
-        for (Integer filmId : inMemoryFilmStorage.getEntityMap().keySet()) {
-            filmsLikeMap.put(inMemoryFilmStorage.getEntityMap().get(filmId), inMemoryFilmStorage.getConnectionsMap().get(filmId).size());
-        }
-
-        int i = count;
-
-        for (Film film : filmsLikeMap.keySet()) {
-            if (i == 0) {
-                break;
-            }
-            filmsLikeList.add(film);
-            i--;
-        }
-        log.info("Возвращён топ " + count + " фильмов по количеству лайков. Всего фильмов с оценками " + filmsLikeMap.size() + ".");
-        return filmsLikeList;
+        log.info("Возвращён топ " + count + " фильмов по количеству лайков. Всего фильмов с оценками " + inMemoryFilmStorage.getConnectionsMap().size() + ".");
+        return topFilmsList;
         }
     }

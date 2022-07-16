@@ -2,9 +2,11 @@ package ru.yandex.practicum.filmorate;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -20,6 +22,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @RestController
 class FilmorateApplicationTests {
+
+    InMemoryFilmStorage inMemoryFilmStorage;
+
+    @Autowired
+    public FilmorateApplicationTests(InMemoryFilmStorage inMemoryFilmStorage) {
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    }
 
     @GetMapping
     public @ResponseBody
@@ -240,7 +249,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser8 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.updateEntity(finalFailUser8),
+        assertThrows(EntityNotFoundException.class, () -> inMemoryUserStorage.updateEntity(finalFailUser8),
                 "При попытке обновить пользователя с несуществующим id не выброшено исключение");
 
         // тест на валидацию при обновлении пользователя сразу по нескольким полям.
@@ -273,7 +282,7 @@ class FilmorateApplicationTests {
     @SneakyThrows
     @Test
     void filmControllerShouldBeCreateUpdateAndGetAllFilms() {
-        InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
+
         String filmName = "nameFilm1";
         String filmDescription = "descFilm1";
         LocalDate filmReleaseDate = LocalDate.of(1991, 1, 1);
@@ -449,7 +458,7 @@ class FilmorateApplicationTests {
                 .build();
 
         Film finalFailFilm6 = failFilm;
-        assertThrows(ValidationException.class, () -> inMemoryFilmStorage.updateEntity(finalFailFilm6),
+        assertThrows(EntityNotFoundException.class, () -> inMemoryFilmStorage.updateEntity(finalFailFilm6),
                 "При попытке обновить фильм с несуществующим id не выброшено исключение");
 
         // тест на валидацию фильма при обновлении сразу по нескольким полям.

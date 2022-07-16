@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -34,8 +33,9 @@ public class InMemoryUserStorage extends InMemoryEntityStorage<User> {
         } else if (!Pattern.compile("^[A-Z\\d._%+-]+@[A-Z\\d.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE).matcher(user.getEmail()).find()) {
             excMsg += "Неверный формат электронной почты " + user.getEmail() + ". ";
         }
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            excMsg += "Логин не может быть пустым и содержать пробелы. ";
+        if (user.getLogin().isEmpty() || user.getLogin().contains(" ") ||
+                !Pattern.compile("^[a-zA-Z\\d._-]{3,}$", Pattern.CASE_INSENSITIVE).matcher(user.getLogin()).find()) {
+            excMsg += "Логин не может быть пустым или содержать пробелы, должен состоять только из a-z, A-Z, 0-9, точек, тире и подчёркиваний. ";
         }
         if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
             excMsg += "Дата рождения — " + user.getBirthday() + " должна быть раньше текущей даты " + LocalDate.now() + ". ";

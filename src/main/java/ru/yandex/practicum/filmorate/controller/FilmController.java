@@ -14,25 +14,27 @@ import java.util.Collection;
 @RequestMapping("/films")
 public class FilmController extends StorageController<Film> {
     FilmService filmService;
+    InMemoryFilmStorage inMemoryFilmStorage;
 
     @Autowired
     protected FilmController(InMemoryFilmStorage inMemoryFilmStorage, FilmService filmService) {
         super(inMemoryFilmStorage);
         this.filmService = filmService;
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
     }
 
     @PutMapping("/{filmId}/like/{userId}")
     void addFilmLike(@PathVariable int filmId, @PathVariable int userId) {
-        inMemoryEntityStorage.addConnection(filmId, userId);
+        inMemoryFilmStorage.addConnection(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     void removeFilmLike(@PathVariable int filmId, @PathVariable int userId) {
-        inMemoryEntityStorage.removeConnection(filmId, userId);
+        inMemoryFilmStorage.removeConnection(filmId, userId);
     }
 
     @GetMapping("/popular")
-    Collection<Film> getTopFilms(@RequestParam(required = false) int count) {
+    Collection<Film> getTopFilms(@RequestParam(required = false, defaultValue = "10") int count) {
         return filmService.getTopFilms(count);
     }
 
