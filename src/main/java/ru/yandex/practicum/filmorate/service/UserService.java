@@ -19,21 +19,16 @@ public class UserService {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
-    // Метод возвращает список всех друзей по id пользователя
+    // Метод возвращает список всех друзей пользователя по id
     public ArrayList<User> getAllFriends(int userId) {
-        if (!inMemoryUserStorage.getConnectionsMap().containsKey(userId)) {
-            // исключение пользователь не найден?
-        }
-
-        if(inMemoryUserStorage.getConnectionsMap().get(userId).isEmpty()) {
-            // исключение пользователь не найден?
-            return null;
-        }
+        inMemoryUserStorage.entityNotFoundCheck("Список друзей не возвращён", userId);
 
         ArrayList<User> friendsList = new ArrayList<>();
 
-        for (Integer Id : inMemoryUserStorage.getConnectionsMap().get(userId)) {
-            friendsList.add(inMemoryUserStorage.getEntityMap().get(Id));
+        if(!inMemoryUserStorage.getConnectionsMap().get(userId).isEmpty()) {
+            for (Integer Id : inMemoryUserStorage.getConnectionsMap().get(userId)) {
+                friendsList.add(inMemoryUserStorage.getEntityMap().get(Id));
+            }
         }
         log.info("Для Пользователя с id " + userId + " возвращён список друзей. Количество объектов " + friendsList.size() + ".");
         return friendsList;
@@ -41,17 +36,15 @@ public class UserService {
 
     // Метод возвращает список общих друзей по id обоих пользователей
     public ArrayList<User> getCommonFriends(int userId, int otherUserId) {
-        if (!inMemoryUserStorage.getConnectionsMap().containsKey(userId)) {
-            // исключение пользователь не найден?
-        } else if (!inMemoryUserStorage.getConnectionsMap().containsKey(otherUserId)) {
-            // исключение другой пользователь не найден?
-        }
+        inMemoryUserStorage.entityNotFoundCheck("Список общих друзей не возвращён.", userId, otherUserId);
 
         ArrayList<User> commonFriendsList = new ArrayList<>();
 
-        for (Integer Id : inMemoryUserStorage.getConnectionsMap().get(userId)) {
-            if (inMemoryUserStorage.getConnectionsMap().get(otherUserId).contains(Id)) {
-                commonFriendsList.add(inMemoryUserStorage.getEntityMap().get(Id));
+        if (inMemoryUserStorage.getConnectionsMap().containsKey(userId) && inMemoryUserStorage.getConnectionsMap().containsKey(otherUserId)) {
+            for (Integer Id : inMemoryUserStorage.getConnectionsMap().get(userId)) {
+                if (inMemoryUserStorage.getConnectionsMap().get(otherUserId).contains(Id)) {
+                    commonFriendsList.add(inMemoryUserStorage.getEntityMap().get(Id));
+                }
             }
         }
         log.info("Для Пользователей с id " + userId + " и " + otherUserId + " возвращён список общих друзей. Количество объектов " + commonFriendsList.size() + ".");

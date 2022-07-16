@@ -21,11 +21,13 @@ public class FilmService {
 
     // Метод возвращает список фильмов заданного размера с наибольшим количестворм лайков
     public Collection<Film> getTopFilms(int count) {
+        if(inMemoryFilmStorage.getConnectionsMap().isEmpty()) {
+            return null;
+        }
         if (count == 0) {
             count = 10;
         }
 
-        int i = count;
         List<Film> filmsLikeList = new ArrayList<>();
 
         Comparator comparator = new Comparator<Map.Entry<Film, Integer>>() {
@@ -40,6 +42,8 @@ public class FilmService {
         for (Integer filmId : inMemoryFilmStorage.getEntityMap().keySet()) {
             filmsLikeMap.put(inMemoryFilmStorage.getEntityMap().get(filmId), inMemoryFilmStorage.getConnectionsMap().get(filmId).size());
         }
+
+        int i = count;
 
         for (Film film : filmsLikeMap.keySet()) {
             if (i == 0) {

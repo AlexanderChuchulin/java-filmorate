@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.ResponseBody;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Entity;
 
 import java.util.ArrayList;
@@ -41,9 +40,7 @@ public abstract class InMemoryEntityStorage<T extends Entity> implements EntityS
     public T updateEntity(T entity) {
         String conclusion = entityName + " не обновлён.";
 
-        if (!entityMap.containsKey(entity.getId())) {
-            throw new ValidationException(entityName + " с id " + entity.getId() + " не найден. " + conclusion);
-        }
+        entityNotFoundCheck(conclusion, entity.getId());
         validateEntity(entity, true, conclusion);
         entityMap.put(entity.getId(), entity);
         log.info(entityName + " с id " + entity.getId() + " обновлён. " + entity);
@@ -54,9 +51,7 @@ public abstract class InMemoryEntityStorage<T extends Entity> implements EntityS
     public void deleteEntityById(int entityId) {
         String conclusion = entityName + " не удалён.";
 
-        if (!entityMap.containsKey(entityId)) {
-            throw new ValidationException(entityName + " с id " + entityId + " не найден. " + conclusion);
-        }
+        entityNotFoundCheck(conclusion, entityId);
         entityMap.remove(entityId);
         log.info(entityName + " с id " + entityId + " удалён. " + entityMap.get(entityId));
     }
@@ -70,9 +65,7 @@ public abstract class InMemoryEntityStorage<T extends Entity> implements EntityS
     public T getEntityById(int entityId) {
         String conclusion = entityName + " не возвращён.";
 
-        if (!entityMap.containsKey(entityId)) {
-            throw new ValidationException(entityName + " с id " + entityId + " не найден. " + conclusion);
-        }
+        entityNotFoundCheck(conclusion, entityId);
         log.info(entityName + " с id " + entityId + " возвращён. " + entityMap.get(entityId));
         return entityMap.get(entityId);
     }
@@ -84,29 +77,37 @@ public abstract class InMemoryEntityStorage<T extends Entity> implements EntityS
 
     @Override
     public void addConnection(int parentId, int childId) {
-        if (connectionsMap.containsKey(parentId)) {
-            connectionsMap.get(parentId).add(childId);
-            connectionsMap.get(childId).add(parentId);
-            log.info("Для - " + entityName + " id " + parentId + " добавлен " + actionName + " с id" + childId
-                    + ". Общее количество связанных объектов " + connectionsMap.get(parentId).size() + ".");
-        } else {
-            // исключение?
+        String conclusion = actionName + " не добавлен.";
+
+        entityNotFoundCheck(conclusion, parentId, childId);
+        if (!connectionsMap.containsKey(parentId)) {
+            connectionsMap.put(parentId, new LinkedHashSet<>());
         }
+        if (!connectionsMap.containsKey(childId)) {
+            connectionsMap.put(childId, new LinkedHashSet<>());
+        }
+
+        connectionsMap.get(parentId).add(childId);
+        connectionsMap.get(childId).add(parentId);
+        log.info("Для - " + entityName + " id " + parentId + " добавлен " + actionName + " с id " + childId
+                + ". Общее количество связанных объектов " + connectionsMap.get(parentId).size() + ".");
     }
 
     @Override
     public void removeConnection(int parentId, int childId) {
-        if (connectionsMap.containsKey(parentId)) {
-            if (connectionsMap.get(parentId).contains(childId)) {
-                connectionsMap.get(parentId).remove(childId);
-                connectionsMap.get(childId).remove(parentId);
-                log.info("Для - " + entityName + " id " + parentId + " удалён " + actionName + " с id" + childId
-                        + ". Общее количество связанных объектов " + connectionsMap.get(parentId).size() + ".");
-            } else {
-                // исключение нет друга?
-            }
+        String excMsg = "Связь между " + entityName + " с id " + parentId + " и " + actionName + " с id " + childId + " не найдена. ";
+        String conclusion = actionName + " для " + entityName + " не удалён.";
+
+
+        entityNotFoundCheck(conclusion, parentId, childId);
+
+        if (connectionsMap.containsKey(parentId) && connectionsMap.get(parentId).contains(childId)) {
+            connectionsMap.get(parentId).remove(childId);
+            connectionsMap.get(childId).remove(parentId);
+            log.info("Для - " + entityName + " id " + parentId + " удалён " + actionName + " с id " + childId
+                    + ". Общее количество связанных объектов " + connectionsMap.get(parentId).size() + ".");
         } else {
-            // исключение нет пользователя?
+            log.info(excMsg);
         }
     }
 
@@ -123,6 +124,24 @@ public abstract class InMemoryEntityStorage<T extends Entity> implements EntityS
         }
         Id++;
         return Id;
+    }
+
+    // Метод проверяет по id существование сущностей и при отсуствии выбрасывает исключение EntityNotFoundException
+    @Override
+    public void entityNotFoundCheck(String conclusion, int parentId, int... childId) {
+        String excMsg = "";
+
+        if (!entityMap.containsKey(parentId)) {
+            excMsg = "Исходный " + entityName + " с id " + parentId + " не найден. ";
+        }
+        if (childId.length == 1 && !entityMap.containsKey(childId[0])) {
+            excMsg += "Добавляемый " + entityName + " с id " + childId[0] + " не найден. ";
+        }
+        if (excMsg.length() > 0) {
+            log.warn("Ошибка поиска объекта " + entityName + ". " + excMsg + conclusion);
+            throw new EntityNotFoundException(excMsg + conclusion);
+        }
+
     }
 
 }

@@ -34,6 +34,9 @@ public interface EntityStorage<T extends Entity> {
     // Метод генерирует id для создаваемого объекта
     int generateId();
 
+    // Метод проверяет по id существование сущностей
+    public void entityNotFoundCheck(String conclusion, int parentId, int... childId);
+
     // Метод производит валидацию объекта при его создании или обновлении
     void validateEntity(T entity, Boolean isUpdate, String conclusion);
 
