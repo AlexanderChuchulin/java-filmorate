@@ -74,7 +74,7 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film> {
     }
 
 
-    // перегруженный метод из-за невозможности проверить второй набор сущностей из супер-класса
+    // перегруженный метод из-за невозможности проверить второй набор сущностей из супер-класса, пока не создан наследник
     public void removeConnection(int parentId, int childId) {
         String excMsg = "Связь между " + entityName + " с id " + parentId + " и объектом с id" + childId + " инициировавший действие " + actionName + " не найдена. ";
         String conclusion = actionName + " для " + entityName + " не удалён.";
@@ -86,16 +86,17 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film> {
             log.info("Для объекта " + entityName + " id " + parentId + " удалён " + actionName + " с id " + childId
                     + ". Количество связанных объектов " + connectionsFilmMap.get(parentId).size() + ".");
 
-            if (connectionsFilmMap.get(parentId).isEmpty()) {
+            // если у сущности пустой список связей, удалить сущность из таблицы связей
+/*            if (connectionsFilmMap.get(parentId).isEmpty()) {
                 connectionsFilmMap.remove(parentId);
-            }
+            }*/
         } else {
             log.info(excMsg);
         }
     }
 
 
-    // перегруженный метод из-за невозможности проверить второй набор сущностей из супер-класса
+    // перегруженный метод из-за невозможности проверить второй набор сущностей из супер-класса, пока не создан наследник
     public void entityNotFoundCheck(String conclusion, int parentId, int childId) {
         String excMsg = "";
 
