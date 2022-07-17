@@ -4,27 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.storage.InMemoryEntityStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 
-
 @RestController
-public abstract class StorageController<T extends Entity> {
-    final InMemoryEntityStorage inMemoryEntityStorage;
-
-
-    @Autowired
-    protected StorageController(InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryEntityStorage = inMemoryFilmStorage;
-        String test = "film";
-    }
+public abstract class StorageController<T extends Entity, V extends Entity> {
+    InMemoryEntityStorage<T, V> inMemoryEntityStorage;
 
     @Autowired
-    public StorageController(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryEntityStorage = inMemoryUserStorage;
+    public StorageController(InMemoryEntityStorage<T, V> inMemoryEntityStorage) {
+        this.inMemoryEntityStorage = inMemoryEntityStorage;
     }
 
     @PostMapping()

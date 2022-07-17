@@ -25,17 +25,11 @@ public interface EntityStorage<T extends Entity> {
     // Метод возвращает список всех объектов
     ArrayList<T> getAllEntity();
 
-    // Метод добавляет связь между объектами по id
-    void addConnection(int parentId, int childId, boolean isMutual);
-
-    // Метод удаляет связь между объектами по id
-    void removeConnection(int parentId, int childId, boolean isMutual);
-
     // Метод генерирует id для создаваемого объекта
     int generateId();
 
     // Метод проверяет по id существование сущностей
-    public void entityNotFoundCheck(String conclusion, int parentId, int... childId);
+    public void entityNotFoundCheck(String conclusion, int parentId, boolean isNotSameKindChild, int... childId);
 
     // Метод производит валидацию объекта при его создании или обновлении
     void validateEntity(T entity, Boolean isUpdate, String conclusion);

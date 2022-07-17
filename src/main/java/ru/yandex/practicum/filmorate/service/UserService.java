@@ -10,24 +10,27 @@ import java.util.ArrayList;
 
 @Service
 @Slf4j
-public class UserService {
-
+public class UserService extends EntityService {
     private final InMemoryUserStorage inMemoryUserStorage;
 
     @Autowired
     public UserService(InMemoryUserStorage inMemoryUserStorage) {
+        super(inMemoryUserStorage);
+        this.entityName = "Пользователь";
+        this.actionName = "Друг";
         this.inMemoryUserStorage = inMemoryUserStorage;
+        this.workingConnectionsMap = inMemoryUserStorage.getSameKindEntityConnectionsMap();
     }
 
     // Метод возвращает список всех друзей пользователя по id
     public ArrayList<User> getAllFriends(int userId) {
-        inMemoryUserStorage.entityNotFoundCheck("Список друзей не возвращён", userId);
+        inMemoryUserStorage.entityNotFoundCheck("Список друзей не возвращён", userId, false);
 
         ArrayList<User> friendsList = new ArrayList<>();
 
-        if(!inMemoryUserStorage.getConnectionsMap().get(userId).isEmpty()) {
-            for (Integer Id : inMemoryUserStorage.getConnectionsMap().get(userId)) {
-                friendsList.add(inMemoryUserStorage.getEntityMap().get(Id));
+        if(!workingConnectionsMap.get(userId).isEmpty()) {
+            for (Integer Id : workingConnectionsMap.get(userId)) {
+                friendsList.add(inMemoryUserStorage.getSameKindEntityMap().get(Id));
             }
         }
         log.info("Для Пользователя с id " + userId + " возвращён список друзей. Количество объектов " + friendsList.size() + ".");
@@ -36,14 +39,14 @@ public class UserService {
 
     // Метод возвращает список общих друзей по id обоих пользователей
     public ArrayList<User> getCommonFriends(int userId, int otherUserId) {
-        inMemoryUserStorage.entityNotFoundCheck("Список общих друзей не возвращён.", userId, otherUserId);
+        inMemoryUserStorage.entityNotFoundCheck("Список общих друзей не возвращён.", userId, false);
 
         ArrayList<User> commonFriendsList = new ArrayList<>();
 
-        if (inMemoryUserStorage.getConnectionsMap().containsKey(userId) && inMemoryUserStorage.getConnectionsMap().containsKey(otherUserId)) {
-            for (Integer Id : inMemoryUserStorage.getConnectionsMap().get(userId)) {
-                if (inMemoryUserStorage.getConnectionsMap().get(otherUserId).contains(Id)) {
-                    commonFriendsList.add(inMemoryUserStorage.getEntityMap().get(Id));
+        if (workingConnectionsMap.containsKey(userId) && workingConnectionsMap.containsKey(otherUserId)) {
+            for (Integer Id : workingConnectionsMap.get(userId)) {
+                if (workingConnectionsMap.get(otherUserId).contains(Id)) {
+                    commonFriendsList.add(inMemoryUserStorage.getSameKindEntityMap().get(Id));
                 }
             }
         }

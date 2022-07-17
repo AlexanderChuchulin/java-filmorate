@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,13 +13,16 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class FilmService {
-
+public class FilmService extends EntityService {
     private final InMemoryFilmStorage inMemoryFilmStorage;
 
     @Autowired
     public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
+        super(inMemoryFilmStorage);
+        this.entityName = "Фильм";
+        this.actionName = "Лайк";
         this.inMemoryFilmStorage = inMemoryFilmStorage;
+        this.workingConnectionsMap = inMemoryFilmStorage.getOtherKindEntityConnectionsMap();
     }
 
     // Метод возвращает список фильмов заданного размера с наибольшим количестворм лайков
@@ -30,26 +34,25 @@ public class FilmService {
             count = 10;
         }
 
-        // дополнительно добавить в топ фильмов по лайкам все фильмы без лайков, потому что наставник,
-        // который писал тесты считает что это логично, а ревьюер без прохождения этих тестов не проверяет задание.
-        //Ситуация: 100 фильмов без лайков - по запросу топа выведут 10 фильмов в каком-то рандомном порядке - это не топ!
-        for (Integer filmId : inMemoryFilmStorage.getEntityMap().keySet()) {
-            if (!inMemoryFilmStorage.getConnectionsMap().containsKey(filmId)) {
-                inMemoryFilmStorage.getConnectionsMap().put(filmId, new LinkedHashSet<>());
+        // дополнительно добавить в топ фильмов по лайкам все фильмы без лайков, потому что наставник, который писал тесты считает что это логично
+        for (Integer filmId : inMemoryFilmStorage.getSameKindEntityMap().keySet()) {
+            if (!workingConnectionsMap.containsKey(filmId)) {
+                workingConnectionsMap.put(filmId, new LinkedHashSet<>());
             }
-            if (inMemoryFilmStorage.getConnectionsMap().get(filmId).isEmpty()) {
+            if (workingConnectionsMap.get(filmId).isEmpty()) {
                 filmsWithoutLikesCount++;
             }
         }
 
-        topFilmsList = inMemoryFilmStorage.getConnectionsMap().entrySet().stream()
+        topFilmsList = workingConnectionsMap.entrySet().stream()
                 .sorted((e1, e2) -> (e1.getValue().size() - e2.getValue().size()) * -1).limit(count)
                 .map(Map.Entry::getKey)
-                .map(inMemoryFilmStorage.getEntityMap()::get)
+                .map(inMemoryFilmStorage.getSameKindEntityMap()::get)
                 .collect(Collectors.toList());
 
-        log.info("Возвращён топ " + count + " фильмов по количеству лайков. Размер списка: " + inMemoryFilmStorage.getConnectionsMap().size()
-                + ". Из них фильмов с оценками: " + (inMemoryFilmStorage.getConnectionsMap().size() - filmsWithoutLikesCount) + ".");
+        log.info("Возвращён топ " + count + " фильмов по количеству лайков. Размер списка: " + topFilmsList.size()
+                + ". Из них фильмов с оценками: " + (topFilmsList.size() - filmsWithoutLikesCount) + ".");
+
         return topFilmsList;
     }
 }

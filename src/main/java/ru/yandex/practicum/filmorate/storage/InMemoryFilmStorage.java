@@ -3,28 +3,24 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @Component
 @Slf4j
-public class InMemoryFilmStorage extends InMemoryEntityStorage<Film> {
+public class InMemoryFilmStorage extends InMemoryEntityStorage<Film, User> {
     Set<String> allFilmsNameAndDate = new HashSet<>();
-    private final Map<Integer, Film> filmsMap;
-    private final Map<Integer, LinkedHashSet<Integer>> connectionsFilmMap;
-    InMemoryUserStorage inMemoryUserStorage;
 
     @Autowired
     public InMemoryFilmStorage(InMemoryUserStorage inMemoryUserStorage) {
         this.entityName = "Фильм";
         this.actionName = "Лайк";
-        this.filmsMap = getEntityMap();
-        this.connectionsFilmMap = getConnectionsMap();
-        this.inMemoryUserStorage = inMemoryUserStorage;
+        this.otherKindEntityMap = inMemoryUserStorage.sameKindEntityMap;
     }
 
     @Override
@@ -56,60 +52,4 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film> {
         }
         allFilmsNameAndDate.add(film.getName() + ";" + film.getReleaseDate());
     }
-
-
-    // перегруженный метод из-за невозможности проверить второй набор сущностей из супер-класса
-    public void addConnection(int parentId, int childId) {
-        String conclusion = actionName + " не добавлен.";
-
-        entityNotFoundCheck(conclusion, parentId, childId);
-
-        if (!connectionsFilmMap.containsKey(parentId)) {
-            connectionsFilmMap.put(parentId, new LinkedHashSet<>());
-        }
-        connectionsFilmMap.get(parentId).add(childId);
-
-        log.info("Для объекта " + entityName + " id " + parentId + " добавлен " + actionName + " с id " + childId
-                + ". Количество связанных объектов " + connectionsFilmMap.get(parentId).size() + ".");
-    }
-
-
-    // перегруженный метод из-за невозможности проверить второй набор сущностей из супер-класса, пока не создан наследник
-    public void removeConnection(int parentId, int childId) {
-        String excMsg = "Связь между " + entityName + " с id " + parentId + " и объектом с id" + childId + " инициировавший действие " + actionName + " не найдена. ";
-        String conclusion = actionName + " для " + entityName + " не удалён.";
-
-        entityNotFoundCheck(conclusion, parentId, childId);
-
-        if (connectionsFilmMap.containsKey(parentId)) {
-            connectionsFilmMap.get(parentId).remove(childId);
-            log.info("Для объекта " + entityName + " id " + parentId + " удалён " + actionName + " с id " + childId
-                    + ". Количество связанных объектов " + connectionsFilmMap.get(parentId).size() + ".");
-
-            // если у сущности пустой список связей, удалить сущность из таблицы связей
-/*            if (connectionsFilmMap.get(parentId).isEmpty()) {
-                connectionsFilmMap.remove(parentId);
-            }*/
-        } else {
-            log.info(excMsg);
-        }
-    }
-
-
-    // перегруженный метод из-за невозможности проверить второй набор сущностей из супер-класса, пока не создан наследник
-    public void entityNotFoundCheck(String conclusion, int parentId, int childId) {
-        String excMsg = "";
-
-        if (!filmsMap.containsKey(parentId)) {
-            excMsg = "Целевой объект " + entityName + " с id " + parentId + " не найден. ";
-        }
-        if (!inMemoryUserStorage.getEntityMap().containsKey(childId)) {
-            excMsg += "Объект с id " + childId + " инициировавший действие " + actionName + " не найден. ";
-        }
-        if (excMsg.length() > 0) {
-            log.warn("Ошибка поиска объектов. " + excMsg + conclusion);
-            throw new EntityNotFoundException(excMsg + conclusion);
-        }
-    }
-
 }

@@ -1,18 +1,17 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
 
-@Component
 @RestController
 @RequestMapping("/users")
-public class UserController extends StorageController<User> {
+public class UserController extends StorageController<User, Film> {
     UserService userService;
 
     @Autowired
@@ -23,12 +22,12 @@ public class UserController extends StorageController<User> {
 
     @PutMapping("/{userId}/friends/{friendId}")
     void addFriend(@PathVariable int userId, @PathVariable int friendId) {
-        inMemoryEntityStorage.addConnection(userId, friendId, true);
+        userService.addConnection(userId, friendId, true, false);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     void removeFriend(@PathVariable int userId, @PathVariable int friendId) {
-        inMemoryEntityStorage.removeConnection(userId, friendId, true);
+        userService.removeConnection(userId, friendId, true, false);
     }
 
     @GetMapping("/{userId}/friends")
