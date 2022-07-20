@@ -1,40 +1,29 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.storage.InMemoryEntityStorage;
 
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
 @Service
 @Slf4j
-public abstract class EntityService {
-    InMemoryEntityStorage inMemoryEntityStorage;
-    protected String entityName;
-    protected String actionName;
+public abstract class EntityService<T extends Entity, V extends Entity> extends InMemoryEntityStorage<T, V> {
     Map<Integer, LinkedHashSet<Integer>> workingConnectionsMap;
-    Map otherKindEntityMap;
-
-
-    @Autowired
-    public EntityService(InMemoryEntityStorage inMemoryEntityStorage) {
-        this.inMemoryEntityStorage = inMemoryEntityStorage;
-    }
 
     // Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) - делает отметку о связи у обоих объектов
     // если предполагается связь между разными видами сущностей (isNotSameKindEntity) - метод дополнительно работает и со второй таблицей связей
     public void addConnection(int parentId, int childId, boolean isTwoWayConnection, boolean isNotSameKindEntity) {
         String conclusion = actionName + " не добавлен.";
 
-        inMemoryEntityStorage.entityNotFoundCheck(conclusion, parentId, isNotSameKindEntity, childId);// если isNotSameKindEntity нужна проверка в двух мапах сущностей???
+        entityNotFoundCheck(conclusion, parentId, isNotSameKindEntity, childId);
 
         if (isNotSameKindEntity) {
-            workingConnectionsMap = inMemoryEntityStorage.getOtherKindEntityConnectionsMap();
+            workingConnectionsMap = getOtherKindEntityConnectionsMap();
         } else {
-            workingConnectionsMap = inMemoryEntityStorage.getSameKindEntityConnectionsMap();
+            workingConnectionsMap = getSameKindEntityConnectionsMap();
         }
 
         if (!workingConnectionsMap.containsKey(parentId)) {
@@ -50,19 +39,18 @@ public abstract class EntityService {
         }
     }
 
-
     // Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) - удаляет отметку о связи у обоих объектов
     // если предполагается связь между разными видами сущностей (isSameKindEntity) - метод дополнительно работает и со второй таблицей связей
     public void removeConnection(int parentId, int childId, boolean isTwoWayConnection, boolean isNotSameKindEntity) {
         String excMsg = "Связь между " + entityName + " с id " + parentId + " и объектом с id " + childId + ", который инициировал удаление " + actionName + " не найдена. ";
         String conclusion = actionName + " для " + entityName + " не удалён.";
 
-        inMemoryEntityStorage.entityNotFoundCheck(conclusion, parentId, isNotSameKindEntity, childId);
+        entityNotFoundCheck(conclusion, parentId, isNotSameKindEntity, childId);
 
         if (isNotSameKindEntity) {
-            workingConnectionsMap = inMemoryEntityStorage.getOtherKindEntityConnectionsMap();
+            workingConnectionsMap = getOtherKindEntityConnectionsMap();
         } else {
-            workingConnectionsMap = inMemoryEntityStorage.getSameKindEntityConnectionsMap();
+            workingConnectionsMap = getSameKindEntityConnectionsMap();
         }
 
         if (!isNotSameKindEntity & isTwoWayConnection) {

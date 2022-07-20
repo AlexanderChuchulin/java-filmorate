@@ -16,10 +16,10 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
 
     protected String entityName;
     protected String actionName;
-    final Map<Integer, T> sameKindEntityMap = new HashMap<>();
-    Map<Integer, V> otherKindEntityMap;
-    private final Map<Integer, LinkedHashSet<Integer>> sameKindEntityConnectionsMap = new HashMap<>();
-    private final Map<Integer, LinkedHashSet<Integer>> otherKindEntityConnectionsMap = new HashMap<>();
+    private final Map<Integer, T> sameKindEntityMap = new HashMap<>();
+    protected Map<Integer, V> otherKindEntityMap;
+    private Map<Integer, LinkedHashSet<Integer>> sameKindEntityConnectionsMap = new HashMap<>();
+    private Map<Integer, LinkedHashSet<Integer>> otherKindEntityConnectionsMap = new HashMap<>();
 
     public Map<Integer, T> getSameKindEntityMap() {
         return sameKindEntityMap;
@@ -33,8 +33,16 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
         return sameKindEntityConnectionsMap;
     }
 
+    public void setSameKindEntityConnectionsMap(Map<Integer, LinkedHashSet<Integer>> sameKindEntityConnectionsMap) {
+        this.sameKindEntityConnectionsMap = sameKindEntityConnectionsMap;
+    }
+
     public Map<Integer, LinkedHashSet<Integer>> getOtherKindEntityConnectionsMap() {
         return otherKindEntityConnectionsMap;
+    }
+
+    public void setOtherKindEntityConnectionsMap(Map<Integer, LinkedHashSet<Integer>> otherKindEntityConnectionsMap) {
+        this.otherKindEntityConnectionsMap = otherKindEntityConnectionsMap;
     }
 
     @Override
@@ -106,12 +114,13 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
     @Override
     public void entityNotFoundCheck(String conclusion, int parentId, boolean isNotSameKindChild, int... childId) {
         String excMsg = "";
-        Map childCheckMap;
+        Map<Integer, ? extends Entity> childCheckMap;
 
         if (isNotSameKindChild) {
-            childCheckMap = otherKindEntityMap;
+            //childCheckMap = getOtherKindEntityMap();//Ни как не могу связать поле childCheckMap с sameKindEntityMap в другом классе наследнике
+            childCheckMap = getSameKindEntityMap();
         } else {
-            childCheckMap = sameKindEntityMap;
+            childCheckMap = getSameKindEntityMap();
         }
         if (!sameKindEntityMap.containsKey(parentId)) {
             excMsg = "Целевой объект " + entityName + " с id " + parentId + " не найден. ";

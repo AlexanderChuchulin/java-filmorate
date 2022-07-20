@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -14,14 +12,7 @@ import java.util.*;
 @Component
 @Slf4j
 public class InMemoryFilmStorage extends InMemoryEntityStorage<Film, User> {
-    Set<String> allFilmsNameAndDate = new HashSet<>();
-
-    @Autowired
-    public InMemoryFilmStorage(InMemoryUserStorage inMemoryUserStorage) {
-        this.entityName = "Фильм";
-        this.actionName = "Лайк";
-        this.otherKindEntityMap = inMemoryUserStorage.sameKindEntityMap;
-    }
+    private final Set<String> allFilmsNameAndDate = new HashSet<>();
 
     @Override
     public void validateEntity(Film film, Boolean isUpdate, String conclusion) {

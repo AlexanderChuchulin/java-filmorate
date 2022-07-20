@@ -9,11 +9,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
-public class Film extends Entity{
+public class Film extends Entity {
     private int id;
     @NotBlank(message = "Необходимо указать название")
     private String name;

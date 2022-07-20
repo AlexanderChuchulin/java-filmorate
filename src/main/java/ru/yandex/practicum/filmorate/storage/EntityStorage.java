@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.Entity;
 import java.util.ArrayList;
 
 
-public interface EntityStorage<T extends Entity> {
+interface EntityStorage<T extends Entity> {
 
     // Метод создаёт объект
     T createEntity(T entity);
@@ -29,9 +29,10 @@ public interface EntityStorage<T extends Entity> {
     int generateId();
 
     // Метод проверяет по id существование сущностей
-    public void entityNotFoundCheck(String conclusion, int parentId, boolean isNotSameKindChild, int... childId);
+    void entityNotFoundCheck(String conclusion, int parentId, boolean isNotSameKindChild, int... childId);
 
     // Метод производит валидацию объекта при его создании или обновлении
-    void validateEntity(T entity, Boolean isUpdate, String conclusion);
+    default void validateEntity(T entity, Boolean isUpdate, String conclusion) {
+    }
 
 }
