@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Entity {
-    int id;
+    private int id;
 }
 
 
