@@ -4,8 +4,7 @@ import ru.yandex.practicum.filmorate.model.Entity;
 
 import java.util.ArrayList;
 
-
-interface EntityStorage<T extends Entity> {
+public interface EntityStorage<T extends Entity> {
 
     // Метод создаёт объект
     T createEntity(T entity);
