@@ -3,8 +3,9 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 
 @Data
-public class Entity {
+public abstract class Entity {
     private int id;
+
 }
 
 
