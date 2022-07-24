@@ -1,26 +1,27 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.yandex.practicum.filmorate.postmanCrutches.FilmDeserializer;
+import ru.yandex.practicum.filmorate.postmanCrutches.FilmSerializer;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.TreeSet;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
+@JsonSerialize(using = FilmSerializer.class)
+@JsonDeserialize(using = FilmDeserializer.class)
 public class Film extends Entity {
-    private int id;
-    @NotBlank(message = "Необходимо указать название")
-    private String name;
-    @NotBlank(message = "Необходимо задать описание")
-    @Size(max = 200, message = "Максимальная длина описания — 200 символов.")
+    private String filmName;
     private String description;
-    @NotNull(message = "Необходимо задать дату релиза")
     private LocalDate releaseDate;
-    @NotNull
     private int duration;
+    private Integer mpaRatingId;
+    private TreeSet<Integer> genreIdSet;
+
 }
