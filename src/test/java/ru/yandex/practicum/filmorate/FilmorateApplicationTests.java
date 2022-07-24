@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
@@ -22,20 +24,20 @@ import static org.junit.jupiter.api.Assertions.*;
 @RestController
 class FilmorateApplicationTests {
 
-    InMemoryFilmStorage inMemoryFilmStorage;
-    InMemoryUserStorage inMemoryUserStorage;
+    UserService userService;
+    FilmService filmService;
+
 
     @Autowired
-    public FilmorateApplicationTests(InMemoryUserStorage inMemoryUserStorage, InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmorateApplicationTests(UserService userService, FilmService filmService) {
+        this.userService = userService;
+        this.filmService = filmService;
 
 
     }
 
     @GetMapping
-    public @ResponseBody
-    <T extends Entity> T getObjToJSONString(T entity) {
+    public @ResponseBody <T extends Entity> T getObjToJSONString(T entity) {
         return entity;
     }
 
@@ -51,18 +53,18 @@ class FilmorateApplicationTests {
         User userFromMap;
 
         // Тесты на создание пользователей
-        assertEquals(0, inMemoryUserStorage.getSameKindEntityMap().size(), "На начало тестов таблица пользователей не пустая");
+        assertEquals(0, userService.getSameKindEntityMap().size(), "На начало тестов таблица пользователей не пустая");
 
-        inMemoryUserStorage.createEntity(User.builder()
+        userService.createEntity(User.builder()
                 .login(userLogin)
                 .name(userName)
                 .email(userEmail)
                 .birthday(userBirthDate)
                 .build());
 
-        assertTrue(inMemoryUserStorage.getSameKindEntityMap().containsKey(1), "Созданный пользователь не найден в памяти по id 1)");
+        assertTrue(userService.getSameKindEntityMap().containsKey(1), "Созданный пользователь не найден в памяти по id 1)");
 
-        userFromMap = inMemoryUserStorage.getSameKindEntityMap().get(1);
+        userFromMap = userService.getSameKindEntityMap().get(1);
 
         assertEquals(userName, userFromMap.getName(), "Имя пользователя не совпадает");
         assertEquals(userLogin, userFromMap.getLogin(), "Логин пользователя не совпадает");
@@ -75,25 +77,25 @@ class FilmorateApplicationTests {
         userName = "";
         userBirthDate = LocalDate.of(2002, 2, 2);
 
-        assertEquals(1, inMemoryUserStorage.getSameKindEntityMap().size(), "Перед созданием второго пользователя в таблице не 1 пользователь");
+        assertEquals(1, userService.getSameKindEntityMap().size(), "Перед созданием второго пользователя в таблице не 1 пользователь");
 
-        inMemoryUserStorage.createEntity(User.builder()
+        userService.createEntity(User.builder()
                 .login(userLogin)
                 .name(userName)
                 .email(userEmail)
                 .birthday(userBirthDate)
                 .build());
 
-        assertTrue(inMemoryUserStorage.getSameKindEntityMap().containsKey(2), "Второй созданный пользователь не найден в памяти по id 2)");
+        assertTrue(userService.getSameKindEntityMap().containsKey(2), "Второй созданный пользователь не найден в памяти по id 2)");
 
-        userFromMap = inMemoryUserStorage.getSameKindEntityMap().get(2);
+        userFromMap = userService.getSameKindEntityMap().get(2);
 
         assertEquals(userLogin, userFromMap.getLogin(), "Пустое имя пользователя не совпадает с логином");
         assertEquals(userLogin, userFromMap.getLogin(), "Логин пользователя2 не совпадает");
         assertEquals(userEmail, userFromMap.getEmail(), "e-mail пользователя2 не совпадает");
         assertEquals(userBirthDate, userFromMap.getBirthday(), "Дата рождения пользователя2 не совпадает");
 
-        assertEquals(2, inMemoryUserStorage.getSameKindEntityMap().size(), "После создания второго пользователя в таблице не 2 пользователя");
+        assertEquals(2, userService.getSameKindEntityMap().size(), "После создания второго пользователя в таблице не 2 пользователя");
 
 
         // Тесты на валидацию при создании пользователей с выбросом исключений
@@ -110,7 +112,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser1 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.createEntity(finalFailUser1),
+        assertThrows(ValidationException.class, () -> userService.createEntity(finalFailUser1),
                 "При попытке создать пользователя с пустым e-mail не выброшено исключение");
 
         userEmail = "e-Ma.il@WrongFormat";
@@ -126,7 +128,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser2 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.createEntity(finalFailUser2),
+        assertThrows(ValidationException.class, () -> userService.createEntity(finalFailUser2),
                 "При попытке создать пользователя с неправильным форматом e-mail не выброшено исключение");
 
         userEmail = "email@User2.ru";
@@ -142,7 +144,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser3 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.createEntity(finalFailUser3),
+        assertThrows(ValidationException.class, () -> userService.createEntity(finalFailUser3),
                 "При попытке создать пользователя с уже зарегистрированным e-mail не выброшено исключение");
 
         userEmail = "email@User3.ru";
@@ -158,7 +160,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser4 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.createEntity(finalFailUser4),
+        assertThrows(ValidationException.class, () -> userService.createEntity(finalFailUser4),
                 "При попытке создать пользователя с пустым логином не выброшено исключение");
 
         userEmail = "email@User3.ru";
@@ -174,7 +176,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser5 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.createEntity(finalFailUser5),
+        assertThrows(ValidationException.class, () -> userService.createEntity(finalFailUser5),
                 "При попытке создать пользователя с логином с пробелами не выброшено исключение");
 
         userEmail = "email@User3.ru";
@@ -190,11 +192,11 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser9 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.createEntity(finalFailUser9),
+        assertThrows(ValidationException.class, () -> userService.createEntity(finalFailUser9),
                 "При попытке создать пользователя с уже зарегистрированным логином не выброшено исключение");
 
         User finalFailUser6 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.createEntity(finalFailUser6),
+        assertThrows(ValidationException.class, () -> userService.createEntity(finalFailUser6),
                 "При попытке создать пользователя с пустой датой рождения не выброшено исключение");
 
         userEmail = "email@User3.ru";
@@ -210,7 +212,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser7 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.createEntity(finalFailUser7),
+        assertThrows(ValidationException.class, () -> userService.createEntity(finalFailUser7),
                 "При попытке создать пользователя с датой рождения из будущего не выброшено исключение");
 
 
@@ -221,7 +223,7 @@ class FilmorateApplicationTests {
         userBirthDate = LocalDate.of(2003, 3, 3);
         int userId = 1;
 
-        inMemoryUserStorage.updateEntity(User.builder()
+        userService.updateEntity(User.builder()
                 .login(userLogin)
                 .name(updatingUserName)
                 .email(updatingUserEmail)
@@ -229,9 +231,9 @@ class FilmorateApplicationTests {
                 .id(userId)
                 .build());
 
-        userFromMap = inMemoryUserStorage.getSameKindEntityMap().get(userId);
+        userFromMap = userService.getSameKindEntityMap().get(userId);
 
-        assertTrue(inMemoryUserStorage.getSameKindEntityMap().containsKey(userId), "Обновлённый пользователь не найден в памяти по id " + userId);
+        assertTrue(userService.getSameKindEntityMap().containsKey(userId), "Обновлённый пользователь не найден в памяти по id " + userId);
         assertEquals(updatingUserName, userFromMap.getName(), "Обновлённое имя пользователя не совпадает");
         assertEquals(updatingUserEmail, userFromMap.getEmail(), "Обновлённый и-мэйл пользователя не совпадает");
 
@@ -251,7 +253,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser8 = failUser;
-        assertThrows(EntityNotFoundException.class, () -> inMemoryUserStorage.updateEntity(finalFailUser8),
+        assertThrows(EntityNotFoundException.class, () -> userService.updateEntity(finalFailUser8),
                 "При попытке обновить пользователя с несуществующим id не выброшено исключение");
 
         // тест на валидацию при обновлении пользователя сразу по нескольким полям.
@@ -271,11 +273,11 @@ class FilmorateApplicationTests {
                 .build();
 
         User finalFailUser10 = failUser;
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.updateEntity(finalFailUser10),
+        assertThrows(ValidationException.class, () -> userService.updateEntity(finalFailUser10),
                 "При попытке обновить пользователя с множественными нарушениями валидации не выброшено исключение");
 
         // тест на возврат всех пользователей
-        assertEquals(List.of(inMemoryUserStorage.getSameKindEntityMap().get(1), inMemoryUserStorage.getSameKindEntityMap().get(2)), inMemoryUserStorage.getAllEntity(),
+        assertEquals(List.of(userService.getSameKindEntityMap().get(1), userService.getSameKindEntityMap().get(2)), userService.getAllEntity(),
                 "Возвращаемое значение всех пользователей не совпадает");
 
     }
@@ -293,18 +295,19 @@ class FilmorateApplicationTests {
         Film filmFromMap;
 
         // Тесты на создание фильмов
-        assertEquals(0, inMemoryFilmStorage.getSameKindEntityMap().size(), "На начало тестов таблица фильмов не пустая");
+        assertEquals(0, filmService.getSameKindEntityMap().size(), "На начало тестов таблица фильмов не пустая");
 
-        inMemoryFilmStorage.createEntity(Film.builder()
+        filmService.createEntity(Film.builder()
                 .name(filmName)
                 .description(filmDescription)
                 .releaseDate(filmReleaseDate)
                 .duration(filmDuration)
+                .mpaRatingId(1)
                 .build());
 
-        assertTrue(inMemoryFilmStorage.getSameKindEntityMap().containsKey(1), "Созданный фильм не найден в памяти по id 1)");
+        assertTrue(filmService.getSameKindEntityMap().containsKey(1), "Созданный фильм не найден в памяти по id 1)");
 
-        filmFromMap = inMemoryFilmStorage.getSameKindEntityMap().get(1);
+        filmFromMap = filmService.getSameKindEntityMap().get(1);
 
         assertEquals(filmName, filmFromMap.getName(), "Имя фильма не совпадает");
         assertEquals(filmDescription, filmFromMap.getDescription(), "Описание фильма не совпадает");
@@ -317,25 +320,26 @@ class FilmorateApplicationTests {
         filmReleaseDate = LocalDate.of(1895, 12, 28); // граничная дата, когда фильм должен быть создан
         filmDuration = 92;
 
-        assertEquals(1, inMemoryFilmStorage.getSameKindEntityMap().size(), "Перед созданием второго фильма в таблице не 1 фильм");
+        assertEquals(1, filmService.getSameKindEntityMap().size(), "Перед созданием второго фильма в таблице не 1 фильм");
 
-        inMemoryFilmStorage.createEntity(Film.builder()
+        filmService.createEntity(Film.builder()
                 .name(filmName)
                 .description(filmDescription)
                 .releaseDate(filmReleaseDate)
                 .duration(filmDuration)
+                .mpaRatingId(1)
                 .build());
 
-        assertTrue(inMemoryFilmStorage.getSameKindEntityMap().containsKey(2), "Второй созданный фильм не найден в памяти по id 2)");
+        assertTrue(filmService.getSameKindEntityMap().containsKey(2), "Второй созданный фильм не найден в памяти по id 2)");
 
-        filmFromMap = inMemoryFilmStorage.getSameKindEntityMap().get(2);
+        filmFromMap = filmService.getSameKindEntityMap().get(2);
 
         assertEquals(filmName, filmFromMap.getName(), "Имя фильма2 не совпадает");
         assertEquals(filmDescription, filmFromMap.getDescription(), "Описание фильма2 не совпадает");
         assertEquals(filmReleaseDate, filmFromMap.getReleaseDate(), "Дата релиза фильма2 не совпадает");
         assertEquals(filmDuration, filmFromMap.getDuration(), "Длительность фильма2 не совпадает");
 
-        assertEquals(2, inMemoryFilmStorage.getSameKindEntityMap().size(), "После создания фильма пользователя в таблице не 2 пользователя");
+        assertEquals(2, filmService.getSameKindEntityMap().size(), "После создания фильма пользователя в таблице не 2 пользователя");
 
 
         // Тесты на валидацию при создании фильмов с выбросом исключений
@@ -352,9 +356,8 @@ class FilmorateApplicationTests {
                 .build();
 
         Film finalFailFilm1 = failFilm;
-        assertThrows(ValidationException.class, () -> inMemoryFilmStorage.createEntity(finalFailFilm1),
+        assertThrows(ValidationException.class, () -> filmService.createEntity(finalFailFilm1),
                 "При попытке создать фильм с пустым названием не выброшено исключение");
-
 
 
         filmName = "nameFilm3";
@@ -372,7 +375,7 @@ class FilmorateApplicationTests {
                 .build();
 
         Film finalFailFilm2 = failFilm;
-        assertThrows(ValidationException.class, () -> inMemoryFilmStorage.createEntity(finalFailFilm2),
+        assertThrows(ValidationException.class, () -> filmService.createEntity(finalFailFilm2),
                 "При попытке создать фильм с описанием более 200 символов не выброшено исключение");
 
         filmName = "nameFilm3";
@@ -388,7 +391,7 @@ class FilmorateApplicationTests {
                 .build();
 
         Film finalFailFilm3 = failFilm;
-        assertThrows(ValidationException.class, () -> inMemoryFilmStorage.createEntity(finalFailFilm3),
+        assertThrows(ValidationException.class, () -> filmService.createEntity(finalFailFilm3),
                 "При попытке создать фильм с датой релиза ранее 28 декабря 1895 не выброшено исключение");
 
         filmName = "nameFilm3";
@@ -404,10 +407,10 @@ class FilmorateApplicationTests {
                 .build();
 
         Film finalFailFilm4 = failFilm;
-        assertThrows(ValidationException.class, () -> inMemoryFilmStorage.createEntity(finalFailFilm4),
+        assertThrows(ValidationException.class, () -> filmService.createEntity(finalFailFilm4),
                 "При попытке создать фильм с нулевой длительностью не выброшено исключение");
 
-        filmFromMap = inMemoryFilmStorage.getSameKindEntityMap().get(1);
+        filmFromMap = filmService.getSameKindEntityMap().get(1);
         filmName = filmFromMap.getName();
         filmDescription = "descFilm3";
         filmReleaseDate = filmFromMap.getReleaseDate();
@@ -421,7 +424,7 @@ class FilmorateApplicationTests {
                 .build();
 
         Film finalFailFilm5 = failFilm;
-        assertThrows(ValidationException.class, () -> inMemoryFilmStorage.createEntity(finalFailFilm5),
+        assertThrows(ValidationException.class, () -> filmService.createEntity(finalFailFilm5),
                 "При попытке создать фильм у которого в базе совпадает и имя и дата релиза не выброшено исключение");
 
 
@@ -432,17 +435,18 @@ class FilmorateApplicationTests {
         int updatingFilmDuration = 111;
         int filmId = 1;
 
-        inMemoryFilmStorage.updateEntity(Film.builder()
+        filmService.updateEntity(Film.builder()
                 .name(updatingFilmName)
                 .description(updatingFilmDesc)
                 .releaseDate(updatingFilmReleaseDate)
                 .duration(updatingFilmDuration)
                 .id(filmId)
+                .mpaRatingId(1)
                 .build());
 
-        filmFromMap = inMemoryFilmStorage.getSameKindEntityMap().get(filmId);
+        filmFromMap = filmService.getSameKindEntityMap().get(filmId);
 
-        assertTrue(inMemoryFilmStorage.getSameKindEntityMap().containsKey(filmId), "Обновлённый фильм не найден в памяти по id " + filmId);
+        assertTrue(filmService.getSameKindEntityMap().containsKey(filmId), "Обновлённый фильм не найден в памяти по id " + filmId);
         assertEquals(updatingFilmName, filmFromMap.getName(), "Обновлённое название фильма не совпадает");
         assertEquals(updatingFilmDesc, filmFromMap.getDescription(), "Обновлённое описание фильма не совпадает");
         assertEquals(updatingFilmReleaseDate, filmFromMap.getReleaseDate(), "Обновлённая дата релиза фильма не совпадает");
@@ -460,7 +464,7 @@ class FilmorateApplicationTests {
                 .build();
 
         Film finalFailFilm6 = failFilm;
-        assertThrows(EntityNotFoundException.class, () -> inMemoryFilmStorage.updateEntity(finalFailFilm6),
+        assertThrows(EntityNotFoundException.class, () -> filmService.updateEntity(finalFailFilm6),
                 "При попытке обновить фильм с несуществующим id не выброшено исключение");
 
         // тест на валидацию фильма при обновлении сразу по нескольким полям.
@@ -481,12 +485,12 @@ class FilmorateApplicationTests {
                 .build();
 
         Film finalFailFilm10 = failFilm;
-        assertThrows(ValidationException.class, () -> inMemoryFilmStorage.updateEntity(finalFailFilm10),
+        assertThrows(ValidationException.class, () -> filmService.updateEntity(finalFailFilm10),
                 "При попытке обновить фильм с множественными нарушениями валидации не выброшено исключение");
 
 
         // тест на возврат всех фильмов
-        assertEquals(List.of(inMemoryFilmStorage.getSameKindEntityMap().get(1), inMemoryFilmStorage.getSameKindEntityMap().get(2)), inMemoryFilmStorage.getAllEntity(),
+        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2)), filmService.getAllEntity(),
                 "Возвращаемое значение всех фильмов не совпадает");
 
     }
