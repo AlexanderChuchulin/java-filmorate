@@ -1,50 +1,43 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dao.service.EntityDbService;
 import ru.yandex.practicum.filmorate.model.Entity;
-import ru.yandex.practicum.filmorate.service.EntityService;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 
 @RestController
 public abstract class StorageController<T extends Entity, V extends Entity> {
-    private final EntityService<T, V> entityService;
-
-    @Autowired
-    public StorageController(EntityService<T, V> entityService) {
-        this.entityService = entityService;
-    }
+    EntityDbService<T, V> dbService;
 
     @PostMapping()
-    public Entity createEntityByController(@Valid @RequestBody T entity) {
-        return entityService.createEntity(entity);
+    public Entity createEntityController(@RequestBody T entity) {
+        return dbService.createEntityDb(entity);
     }
 
     @PutMapping()
-    public Entity updateEntityByController(@Valid @RequestBody T entity) {
-        return entityService.updateEntity(entity);
+    public Entity updateEntityController(@RequestBody T entity) {
+        return dbService.updateEntityDb(entity);
     }
 
     @DeleteMapping("/{entityId}")
-    public void deleteEntityByIdByController(@PathVariable int entityId) {
-        entityService.deleteEntityById(entityId);
+    public void deleteEntityByIdController(@PathVariable int entityId) {
+        dbService.deleteEntityByIdDb(entityId);
     }
 
     @DeleteMapping
-    public void deleteAllEntityByController() {
-        entityService.deleteAllEntity();
+    public void deleteAllEntityController() {
+        dbService.deleteAllEntityDb();
     }
 
     @GetMapping("/{entityId}")
-    public Entity getEntityByIdByController(@PathVariable int entityId) {
-        return entityService.getEntityById(entityId);
+    public Entity getEntityByIdController(@PathVariable int entityId) {
+        return dbService.getEntityByIdDb(entityId);
     }
 
     @GetMapping()
-    public ArrayList<T> getAllEntityByController() {
-        return entityService.getAllEntity();
+    public ArrayList<T> getAllEntityController() {
+        return dbService.getAllEntityDb();
     }
 
 }

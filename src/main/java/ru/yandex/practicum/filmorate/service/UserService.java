@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -17,22 +18,32 @@ public class UserService extends EntityService<User, Film> {
 
     @Autowired
     public UserService(InMemoryUserStorage inMemoryUserStorage, InMemoryFilmStorage inMemoryFilmStorage) {
+        super(inMemoryUserStorage, inMemoryFilmStorage);
         this.inMemoryUserStorage = inMemoryUserStorage;
-        this.entityName = "Пользователь";
-        this.actionName = "Друг";
-        this.otherKindEntityMap = inMemoryFilmStorage.getSameKindEntityMap();
-        this.workingConnectionsMap = inMemoryUserStorage.getSameKindEntityConnectionsMap();
+        inMemoryStorage = inMemoryUserStorage;
+        entityName = inMemoryUserStorage.getEntityName();
+        actionName = inMemoryUserStorage.getActionName();
+    }
+
+    public Map<Integer, User> getSameKindEntityMap() {
+        return inMemoryUserStorage.getSameKindEntityMap();
+    }
+
+
+    @Override
+    public void entityNotFoundCheck(String conclusion, int parentId, boolean isNotSameKindChild, int... childId) {
+        inMemoryUserStorage.entityNotFoundCheck(conclusion, parentId, isNotSameKindChild, childId);
     }
 
     // Метод возвращает список всех друзей пользователя по id
-    public ArrayList<User> getAllFriends(int userId) {
+    public ArrayList<User> getFriendsByUserId(int userId) {
         entityNotFoundCheck("Список друзей не возвращён", userId, false);
 
         ArrayList<User> friendsList = new ArrayList<>();
 
-        if (!workingConnectionsMap.get(userId).isEmpty()) {
+        if (workingConnectionsMap.containsKey(userId) && !workingConnectionsMap.get(userId).isEmpty()) {
             for (Integer Id : workingConnectionsMap.get(userId)) {
-                friendsList.add(getSameKindEntityMap().get(Id));
+                friendsList.add(inMemoryUserStorage.getSameKindEntityMap().get(Id));
             }
         }
         log.info("Для Пользователя с id " + userId + " возвращён список друзей. Количество объектов " + friendsList.size() + ".");
@@ -41,14 +52,14 @@ public class UserService extends EntityService<User, Film> {
 
     // Метод возвращает список общих друзей по id обоих пользователей
     public ArrayList<User> getCommonFriends(int userId, int otherUserId) {
-        entityNotFoundCheck("Список общих друзей не возвращён.", userId, false);
+        entityNotFoundCheck("Список общих друзей не возвращён.", userId, false, otherUserId);
 
         ArrayList<User> commonFriendsList = new ArrayList<>();
 
         if (workingConnectionsMap.containsKey(userId) && workingConnectionsMap.containsKey(otherUserId)) {
             for (Integer Id : workingConnectionsMap.get(userId)) {
                 if (workingConnectionsMap.get(otherUserId).contains(Id)) {
-                    commonFriendsList.add(getSameKindEntityMap().get(Id));
+                    commonFriendsList.add(inMemoryUserStorage.getSameKindEntityMap().get(Id));
                 }
             }
         }
@@ -56,8 +67,5 @@ public class UserService extends EntityService<User, Film> {
         return commonFriendsList;
     }
 
-    @Override
-    public void validateEntity(User entity, Boolean isUpdate, String conclusion) {
-        inMemoryUserStorage.validateEntity(entity, isUpdate, conclusion);
-    }
+
 }

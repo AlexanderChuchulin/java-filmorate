@@ -19,7 +19,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(final EntityNotFoundException e) {
+    public ErrorResponse handleEntityNotFoundException(final EntityNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 

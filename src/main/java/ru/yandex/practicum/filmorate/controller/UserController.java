@@ -2,42 +2,41 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dao.service.UserDbService;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/users")
 public class UserController extends StorageController<User, Film> {
-    private final UserService userService;
+    private final UserDbService userDbService;
 
     @Autowired
-    public UserController(UserService userService) {
-        super(userService);
-        this.userService = userService;
+    public UserController(UserDbService userDbService) {
+        this.userDbService = userDbService;
+        dbService = userDbService;
     }
 
+
     @PutMapping("/{userId}/friends/{friendId}")
-    void addFriendByController(@PathVariable int userId, @PathVariable int friendId) {
-        userService.addConnection(userId, friendId, true, false);
+    void addFriendController(@PathVariable int userId, @PathVariable int friendId) {
+        userDbService.addConnectionDb(userId, friendId, false, false);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    void removeFriendByController(@PathVariable int userId, @PathVariable int friendId) {
-        userService.removeConnection(userId, friendId, true, false);
+    void removeFriendController(@PathVariable int userId, @PathVariable int friendId) {
+        userDbService.removeConnectionDb(userId, friendId, false, false);
     }
 
     @GetMapping("/{userId}/friends")
-    ArrayList<User> getAllFriendsByController(@PathVariable int userId) {
-        return userService.getAllFriends(userId);
+    ArrayList<User> getAllFriendsController(@PathVariable int userId) {
+        return userDbService.getFriendsByUserIdDb(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherUserId}")
-    ArrayList<User> getCommonFriendsByController(@PathVariable int userId, @PathVariable int otherUserId) {
-        return userService.getCommonFriends(userId,otherUserId);
+    ArrayList<User> getCommonFriendsController(@PathVariable int userId, @PathVariable int otherUserId) {
+        return userDbService.getCommonFriendsDb(userId, otherUserId);
     }
-
-
 }

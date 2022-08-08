@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,9 +11,9 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class User extends Entity {
-    private int id;
     private String login;
-    private String name;
+    @JsonProperty("name")
+    private String userName;
     private String email;
     private LocalDate birthday;
 }
