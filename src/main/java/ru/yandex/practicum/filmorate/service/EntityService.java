@@ -61,8 +61,9 @@ public abstract class EntityService<T extends Entity, V extends Entity> {
     }
 
 
-    // Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) - делает отметку о связи у обоих объектов
-    // если предполагается связь между разными видами сущностей (isNotSameKindEntity) - метод дополнительно работает и со второй таблицей связей
+    // Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) -
+    // делает отметку о связи у обоих объектов если предполагается связь между разными видами сущностей (isNotSameKindEntity)
+    // - метод дополнительно работает и со второй таблицей связей
     public void addConnection(int parentId, int childId, boolean isTwoWayConnection, boolean isNotSameKindEntity) {
         String conclusion = actionName + " не добавлен.";
 
@@ -70,7 +71,8 @@ public abstract class EntityService<T extends Entity, V extends Entity> {
             workingConnectionsMap = sameKindEntityConnectionsMap;
 
             if (parentId == childId) {
-                log.info("Попытка создать в памяти связь между объектами одного вида с одинаковым id " + parentId + ". " + conclusion);
+                log.info("Попытка создать в памяти связь между объектами одного вида с одинаковым id " +
+                        parentId + ". " + conclusion);
                 return;
             }
         } else {
@@ -90,12 +92,15 @@ public abstract class EntityService<T extends Entity, V extends Entity> {
             }
             workingConnectionsMap.get(childId).add(parentId);
         }
-        log.info("Для объекта " + entityName + " с id " + parentId + " в память добавлен " + actionName + " с id " + childId
-                + ". Количество связанных объектов для id " + parentId + " в памяти " + workingConnectionsMap.get(parentId).size() + ".");
+        log.info("Для объекта " + entityName + " с id " + parentId + " в память добавлен " +
+                actionName + " с id " + childId
+                + ". Количество связанных объектов для id " + parentId + " в памяти " +
+                workingConnectionsMap.get(parentId).size() + ".");
     }
 
-    // Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) - удаляет отметку о связи у обоих объектов
-    // если предполагается связь между разными видами сущностей (isSameKindEntity) - метод дополнительно работает и со второй таблицей связей
+    // Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) -
+    // удаляет отметку о связи у обоих объектов если предполагается связь между разными видами сущностей (isSameKindEntity)
+    // - метод дополнительно работает и со второй таблицей связей
     public void removeConnection(int parentId, int childId, boolean isTwoWayConnection, boolean isNotSameKindEntity) {
         String excMsg = "Связь между " + entityName + " с id " + parentId + " и объектом с id " + childId +
                 ", который инициировал удаление " + actionName + " в памяти не найдена. ";
@@ -105,7 +110,8 @@ public abstract class EntityService<T extends Entity, V extends Entity> {
             workingConnectionsMap = sameKindEntityConnectionsMap;
 
             if (parentId == childId) {
-                log.info("Попытка удалить из памяти связь между объектами одного вида с одинаковым id " + parentId + ". " + conclusion);
+                log.info("Попытка удалить из памяти связь между объектами одного вида с одинаковым id " +
+                        parentId + ". " + conclusion);
                 return;
             }
         } else {
@@ -119,10 +125,13 @@ public abstract class EntityService<T extends Entity, V extends Entity> {
                 workingConnectionsMap.get(childId).remove(parentId);
             }
         }
-        if (!isNotSameKindEntity && workingConnectionsMap.containsKey(parentId) && workingConnectionsMap.get(parentId).contains(childId)) {
+        if (!isNotSameKindEntity && workingConnectionsMap.containsKey(parentId) &&
+                workingConnectionsMap.get(parentId).contains(childId)) {
             workingConnectionsMap.get(parentId).remove(childId);
-            log.info("Для объекта " + entityName + " id " + parentId + " из памяти удалён " + actionName + " с id " + childId
-                    + ". Количество связанных объектов для id " + parentId + " в памяти " + workingConnectionsMap.get(parentId).size() + ".");
+            log.info("Для объекта " + entityName + " id " + parentId + " из памяти удалён " +
+                    actionName + " с id " + childId
+                    + ". Количество связанных объектов для id " + parentId + " в памяти " +
+                    workingConnectionsMap.get(parentId).size() + ".");
         } else {
             log.info(excMsg);
         }

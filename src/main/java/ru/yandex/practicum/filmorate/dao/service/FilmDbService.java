@@ -39,9 +39,10 @@ public class FilmDbService extends EntityDbService <Film, User> {
             sql = String.format("SELECT \"films\".* FROM \"films\" LEFT OUTER JOIN \"film_user_likes\" AS likes " +
                     "ON likes.\"film_id\" = \"films\".\"film_id\" GROUP BY \"films\".\"film_id\" " +
                     "ORDER BY COUNT(likes.\"film_id\") DESC LIMIT %s", limit);
-            EntityDbStorage.getJdbcTemplate().query(sql, (resSet, rowNum) -> topFilmsList.add(dbStorage.convertResSetToEntity(resSet, false)));
-            log.info("Из БД Возвращён топ " + limit + " фильмов по количеству лайков. Размер списка: " + topFilmsList.size()
-                    + ". Всего фильмов с оценками: " + likeCount + ".");
+            EntityDbStorage.getJdbcTemplate().query(sql, (resSet, rowNum)
+                    -> topFilmsList.add(dbStorage.convertResSetToEntity(resSet, false)));
+            log.info("Из БД Возвращён топ " + limit + " фильмов по количеству лайков. Размер списка: "
+                    + topFilmsList.size() + ". Всего фильмов с оценками: " + likeCount + ".");
         }
         return topFilmsList;
     }

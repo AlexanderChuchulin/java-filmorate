@@ -61,7 +61,9 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
 
         if (maxId != null && maxId > inMemoryStorage.getStartId()) {
             inMemoryStorage.setStartId(maxId);
-            log.info("В БД таблице " + sameKindDbTableName + " найдено строк: " + rowCount + ". По максимальному значению id из БД установлено стартовое значение id в памяти " + inMemoryStorage.getStartId() + ".");
+            log.info("В БД таблице " + sameKindDbTableName + " найдено строк: " + rowCount + ". " +
+                    "По максимальному значению id из БД установлено стартовое значение id в памяти "
+                    + inMemoryStorage.getStartId() + ".");
         }
     }
 
@@ -118,7 +120,8 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
 
 
     // Метод сохраняет в БД, загружает и удаляет из БД примитивы и строки из определённой таблицы с двумя столбцами
-    public static void crudDbSimpleDataMap(String tableNameFromDb, Map inMemoryMap, List inMemoryList, boolean isLoadFromDb, boolean isRemove, int... entityId) {
+    public static void crudDbSimpleDataMap(String tableNameFromDb, Map inMemoryMap, List inMemoryList,
+                                           boolean isLoadFromDb, boolean isRemove, int... entityId) {
         String sql = "";
         String columnName = "";
         String otherColumnName = "";
@@ -141,39 +144,49 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             } else if (entityId.length == 1) {
                 sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDb, columnName, entityId[0]);
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
-                log.info("База данных тип - " + tableNameFromDb + ". Количество строк с id " + entityId[0] + " найденных в базе " + rowCount + ".");
+                log.info("База данных тип - " + tableNameFromDb + ". Количество строк с id " + entityId[0] +
+                        " найденных в базе " + rowCount + ".");
                 sql = String.format("SELECT * FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDb, columnName, entityId[0]);
             } else if (entityId.length == 2) {
-                sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName, entityId[0], otherColumnName, entityId[1]);
+                sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb,
+                        columnName, entityId[0], otherColumnName, entityId[1]);
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
-                log.info("База данных тип - " + tableNameFromDb + ". Количество строк с сочетанием id " + entityId[0] + " и " + entityId[1] + " найденных в базе " + rowCount + ".");
-                sql = String.format("SELECT * FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName, entityId[0], otherColumnName, entityId[1]);
+                log.info("База данных тип - " + tableNameFromDb + ". Количество строк с сочетанием id " + entityId[0] +
+                        " и " + entityId[1] + " найденных в базе " + rowCount + ".");
+                sql = String.format("SELECT * FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName,
+                        entityId[0], otherColumnName, entityId[1]);
             }
             if (rowCount > 0 && (inMemoryMap != null || inMemoryList != null)) {
                 if (inMemoryMap != null) {
-                    jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryMap.put(resSet.getInt(1), resSet.getString(2)));
+                    jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryMap.put(resSet.getInt(1),
+                            resSet.getString(2)));
                 }
                 if (inMemoryList != null) {
                     jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryList.add(resSet.getInt(2)));
                 }
-                log.info("Загружены данные из базы данных таблица - " + tableNameFromDb + ". Количество загруженных строк " + rowCount + ".");
+                log.info("Загружены данные из базы данных таблица - " + tableNameFromDb + ". " +
+                        "Количество загруженных строк " + rowCount + ".");
             }
         }
         if (!isLoadFromDb & !isRemove) {
             int saveRowCount = 0;
             if (inMemoryMap.size() > 0) {
                 for (Object parentId : inMemoryMap.keySet()) {
-                    sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName, parentId, otherColumnName, inMemoryMap.get(parentId));
+                    sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s",
+                            tableNameFromDb, columnName, parentId, otherColumnName, inMemoryMap.get(parentId));
                     rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
 
                     if (rowCount == 0) {
-                        sql = String.format("INSERT INTO \"%s\" VALUES ('%s', '%s')", tableNameFromDb, parentId, inMemoryMap.get(parentId));
+                        sql = String.format("INSERT INTO \"%s\" VALUES ('%s', '%s')", tableNameFromDb, parentId,
+                                inMemoryMap.get(parentId));
                         jdbcTemplate.update(sql);
                         saveRowCount++;
                         log.info("Сохранён ряд в базу данных таблица - " + tableNameFromDb +
-                                " с значениями " + parentId + " и " + inMemoryMap.get(parentId) + ". Общее количество сохранённых строк " + saveRowCount + ".");
+                                " с значениями " + parentId + " и " + inMemoryMap.get(parentId) + ". " +
+                                "Общее количество сохранённых строк " + saveRowCount + ".");
                     } else {
-                        log.info("В БД найден дубликат записи. Ряд с значениями " + parentId + " и " + inMemoryMap.get(parentId) + " в БД таблица " + tableNameFromDb +
+                        log.info("В БД найден дубликат записи. Ряд с значениями " + parentId + " и " +
+                                inMemoryMap.get(parentId) + " в БД таблица " + tableNameFromDb +
                                 " не сохранён. Общее количество сохранённых строк " + saveRowCount + ".");
                     }
                 }
@@ -188,17 +201,22 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             } else if (entityId.length == 1) {
                 sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDb, columnName, entityId[0]);
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
-                log.info("База данных тип - " + tableNameFromDb + ". Количество строк с id " + entityId[0] + " найденных в базе " + rowCount + ".");
+                log.info("База данных тип - " + tableNameFromDb + ". Количество строк с id " + entityId[0] +
+                        " найденных в базе " + rowCount + ".");
                 sql = String.format("DELETE FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDb, columnName, entityId[0]);
             } else if (entityId.length == 2) {
-                sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName, entityId[0], otherColumnName, entityId[1]);
+                sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb,
+                        columnName, entityId[0], otherColumnName, entityId[1]);
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
-                log.info("База данных тип - " + tableNameFromDb + ". Количество строк с сочетанием id " + entityId[0] + " и " + entityId[1] + " найденных в базе " + rowCount + ".");
-                sql = String.format("DELETE FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName, entityId[0], otherColumnName, entityId[1]);
+                log.info("База данных тип - " + tableNameFromDb + ". Количество строк с сочетанием id " + entityId[0] +
+                        " и " + entityId[1] + " найденных в базе " + rowCount + ".");
+                sql = String.format("DELETE FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName,
+                        entityId[0], otherColumnName, entityId[1]);
             }
             if (rowCount > 0) {
                 jdbcTemplate.update(sql);
-                log.info("Удалены данные из базы данных таблица - " + tableNameFromDb + ". Количество удалённых строк " + rowCount + ".");
+                log.info("Удалены данные из базы данных таблица - " + tableNameFromDb +
+                        ". Количество удалённых строк " + rowCount + ".");
             }
         }
     }
@@ -221,9 +239,11 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
 
         if (entityId.length == 0) {
             sql = String.format("SELECT * FROM \"%s\"", tableNameFromDB);
-            logMsg = "Загружены данные из базы данных таблица - " + tableNameFromDB + ". Количество загруженных объектов " + rowCount + ".";
+            logMsg = "Загружены данные из базы данных таблица - " + tableNameFromDB +
+                    ". Количество загруженных объектов " + rowCount + ".";
         } else {
-            sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDB, columnName, entityId[0]);
+            sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s",
+                    tableNameFromDB, columnName, entityId[0]);
             rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
             sql = String.format("SELECT * FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDB, columnName, entityId[0]);
             logMsg = "Загружена строка с id " + entityId[0] + " из базы данных таблица - " + tableNameFromDB + ". ";
@@ -231,23 +251,28 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
 
         if (rowCount > 0) {
             String finalColumnName = columnName;
-            jdbcTemplate.query(sql, (resSet, rowNum) -> imMemoryMap.put(resSet.getInt(finalColumnName), convertResSetToEntity(resSet, tableNameFromDB.contains("user"))));
+            jdbcTemplate.query(sql, (resSet, rowNum) -> imMemoryMap.put(resSet.getInt(finalColumnName),
+                    convertResSetToEntity(resSet, tableNameFromDB.contains("user"))));
             log.info(logMsg);
         }
     }
 
 
-    // При создании и обновлении объектов, для контроля за дубликатами сущностей по ключевым полям, метод ищет и при нахождении загружает в память сами сущности
-    //и их ключевые поля в соответствующие таблицы главных свойств: для пользователя - логин и e-mail, для фильма сочетание названия и даты выпуска
-    public void findAndGetEntityFromDb(Entity entity) {
+    // При создании и обновлении объектов, для контроля за дубликатами сущностей по ключевым полям,
+    // метод ищет и при нахождении загружает в память сами сущности
+    //и их ключевые поля в соответствующие таблицы главных свойств: для пользователя - логин и e-mail,
+    // для фильма сочетание названия и даты выпуска
+    private void findAndGetEntityFromDb(Entity entity) {
         String sql = "";
         int rowCount = 0;
 
         if (entity.getClass() == User.class) {
             User user = (User) entity;
-            sql = String.format("SELECT COUNT (*) FROM \"users\" WHERE \"user_email\" = '%s' OR \"user_login\" = '%s'", user.getEmail(), user.getLogin());
+            sql = String.format("SELECT COUNT (*) FROM \"users\" WHERE \"user_email\" = '%s' OR \"user_login\" = '%s'",
+                    user.getEmail(), user.getLogin());
             rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
-            sql = String.format("SELECT * FROM \"users\" WHERE \"user_email\" = '%s' OR \"user_login\" = '%s'", user.getEmail(), user.getLogin());
+            sql = String.format("SELECT * FROM \"users\" WHERE \"user_email\" = '%s' OR \"user_login\" = '%s'",
+                    user.getEmail(), user.getLogin());
         }
 
         if (entity.getClass() == Film.class) {
@@ -262,16 +287,26 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
         }
 
         if (entity.getClass() == User.class) {
-            jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryStorage.getSameKindEntityMap().put(resSet.getInt("user_id"), convertResSetToEntity(resSet, true)));
-            jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryStorage.getEntityMainPropMap().put(resSet.getString("user_login"), resSet.getString("user_email")));
-            log.info("При проверке найдены и загружены данные из базы данных таблица - Пользователи. Количество загруженных объектов " + rowCount + ".");
+            jdbcTemplate.query(sql, (resSet, rowNum)
+                    -> inMemoryStorage.getSameKindEntityMap().put(resSet.getInt("user_id"),
+                    convertResSetToEntity(resSet, true)));
+            jdbcTemplate.query(sql, (resSet, rowNum)
+                    -> inMemoryStorage.getEntityMainPropMap().put(resSet.getString("user_login"),
+                    resSet.getString("user_email")));
+            log.info("При проверке найдены и загружены данные из базы данных таблица - Пользователи. " +
+                    "Количество загруженных объектов " + rowCount + ".");
         }
 
         if (entity.getClass() == Film.class) {
-            jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryStorage.getSameKindEntityMap().put(resSet.getInt("film_id"), convertResSetToEntity(resSet, false)));
-            jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryStorage.getEntityMainPropMap().put(resSet.getString("film_name") + ";" + resSet.getString("film_release_date"),
+            jdbcTemplate.query(sql, (resSet, rowNum)
+                    -> inMemoryStorage.getSameKindEntityMap().put(resSet.getInt("film_id"),
+                    convertResSetToEntity(resSet, false)));
+            jdbcTemplate.query(sql, (resSet, rowNum)
+                    -> inMemoryStorage.getEntityMainPropMap().put(resSet.getString("film_name") + ";" +
+                            resSet.getString("film_release_date"),
                     resSet.getString("film_name") + ";" + resSet.getString("film_release_date")));
-            log.info("При проверке найдены и загружены данные из базы данных таблица - Фильмы. Количество загруженных объектов " + rowCount + ".");
+            log.info("При проверке найдены и загружены данные из базы данных таблица - Фильмы. " +
+                    "Количество загруженных объектов " + rowCount + ".");
         }
 
     }
@@ -302,12 +337,13 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             Film film = (Film) entity;
 
             if (film.getMpaRatingId() != null) {
-                sql = sqlKeyWord + " \"films\" (\"film_id\", \"film_name\", \"film_duration_min\", \"film_release_date\", \"mpa_id\", \"film_desc\")"
-                        + " VALUES " + "('" + film.getId() + "', '" + film.getFilmName() + "', '"
-                        + film.getDuration() + "', '" + film.getReleaseDate() + "', '" + film.getMpaRatingId() + "', '" + film.getDescription() + "');";
+                sql = sqlKeyWord + " \"films\" (\"film_id\", \"film_name\", \"film_duration_min\", \"film_release_date\"," +
+                        " \"mpa_id\", \"film_desc\")" + " VALUES " + "('" + film.getId() + "', '" + film.getFilmName() +
+                        "', '" + film.getDuration() + "', '" + film.getReleaseDate() + "', '" + film.getMpaRatingId() +
+                        "', '" + film.getDescription() + "');";
             } else {
-                sql = sqlKeyWord + " \"films\" (\"film_id\", \"film_name\", \"film_duration_min\", \"film_release_date\", \"film_desc\")"
-                        + " VALUES " + "('" + film.getId() + "', '" + film.getFilmName() + "', '"
+                sql = sqlKeyWord + " \"films\" (\"film_id\", \"film_name\", \"film_duration_min\", \"film_release_date\"," +
+                        " \"film_desc\")" + " VALUES " + "('" + film.getId() + "', '" + film.getFilmName() + "', '"
                         + film.getDuration() + "', '" + film.getReleaseDate() + "', '" + film.getDescription() + "');";
             }
 
@@ -319,7 +355,8 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             }
             if (film.getGenreIdSet() != null && !film.getGenreIdSet().isEmpty()) {
                 for (int genreId : film.getGenreIdSet()) {
-                    sql = "INSERT INTO \"film_genre\" (\"film_id\", \"genre_id\")" + " VALUES " + "('" + film.getId() + "', '" + genreId + "');";
+                    sql = "INSERT INTO \"film_genre\" (\"film_id\", \"genre_id\")" + " VALUES " +
+                            "('" + film.getId() + "', '" + genreId + "');";
                     jdbcTemplate.update(sql);
                 }
             }
@@ -362,8 +399,10 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                 }
                 sql = String.format("SELECT \"genre_id\" FROM \"film_genre\" WHERE \"film_id\" = '%s'", film.getId());
 
-                jdbcTemplate.query(sql, (resSetGenres, rowNum) -> film.getGenreIdSet().add(resSetGenres.getInt("genre_id")));
-                log.info("Для фильма c id " + film.getId() + " найдены и загружены жанры из базы данных таблица - Фильм-Жанр. Количество загруженных жанров " + rowCount + ".");
+                jdbcTemplate.query(sql, (resSetGenres, rowNum)
+                        -> film.getGenreIdSet().add(resSetGenres.getInt("genre_id")));
+                log.info("Для фильма c id " + film.getId() + " найдены и загружены жанры из базы данных таблица - " +
+                        "Фильм-Жанр. Количество загруженных жанров " + rowCount + ".");
             }
             return (T) film;
         }

@@ -46,7 +46,8 @@ public class UserService extends EntityService<User, Film> {
                 friendsList.add(inMemoryUserStorage.getSameKindEntityMap().get(Id));
             }
         }
-        log.info("Для Пользователя с id " + userId + " возвращён список друзей. Количество объектов " + friendsList.size() + ".");
+        log.info("Для Пользователя с id " + userId + " возвращён список друзей. " +
+                "Количество объектов " + friendsList.size() + ".");
         return friendsList;
     }
 
@@ -63,7 +64,8 @@ public class UserService extends EntityService<User, Film> {
                 }
             }
         }
-        log.info("Для Пользователей с id " + userId + " и " + otherUserId + " возвращён список общих друзей. Количество объектов " + commonFriendsList.size() + ".");
+        log.info("Для Пользователей с id " + userId + " и " + otherUserId + " " +
+                "возвращён список общих друзей. Количество объектов " + commonFriendsList.size() + ".");
         return commonFriendsList;
     }
 

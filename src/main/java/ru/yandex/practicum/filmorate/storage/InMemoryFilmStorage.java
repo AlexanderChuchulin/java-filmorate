@@ -43,7 +43,8 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film, User> {
         if (film.getDescription() == null || film.getDescription().length() > 200) {
             excMsg += "Описание должно быть задано и быть не более 200 символов. ";
         }
-        if (film.getReleaseDate() == null || !film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 27))) {
+        if (film.getReleaseDate() == null ||
+                !film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 27))) {
             excMsg += "Дата релиза должна быть задана после 27 декабря 1895 года. ";
         }
         if (film.getDuration() <= 0 || film.getDuration() > 1000000000) {
@@ -58,7 +59,8 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film, User> {
         // если фильм с такой же датой существует и не происходит обновление, выбросить исключение
         // если же происходит обновление названия или года выпуска, то нужно удалить старую запись из списка
         if (entityMainPropMap.containsKey(film.getFilmName() + ";" + film.getReleaseDate()) & !isUpdate) {
-            excMsg += "Фильм с названием — " + film.getFilmName() + " и с датой выпуска " + film.getReleaseDate() + " уже существует. ";
+            excMsg += "Фильм с названием — " + film.getFilmName() + " и с датой выпуска " +
+                    film.getReleaseDate() + " уже существует. ";
         } else if (entityMainPropMap.containsKey(film.getFilmName() + ";" + film.getReleaseDate()) & isUpdate) {
             entityMainPropMap.remove(film.getFilmName() + ";" + film.getReleaseDate());
         }
@@ -66,7 +68,8 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film, User> {
             log.warn("Ошибка валидации фильма. " + excMsg + conclusion);
             throw new ValidationException(excMsg + conclusion);
         }
-        entityMainPropMap.put(film.getFilmName() + ";" + film.getReleaseDate(), film.getFilmName() + ";" + film.getReleaseDate());
+        entityMainPropMap.put(film.getFilmName() + ";" + film.getReleaseDate(),
+                film.getFilmName() + ";" + film.getReleaseDate());
     }
 
     //  Метод возвращает рейтинг MPA или жанр по его id, либо вcю таблицу если id не задан
@@ -88,9 +91,11 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film, User> {
             return workingMap;
         } else {
             if (isMpa && mpaNotFoundCheck(propId[0])) {
-                excMsg = "Рейтинг MPA по id не найден, таблица доступных видов рейтинга MPA: " + mpaRatingMap +  ". " + name + " не возвращён. ";
+                excMsg = "Рейтинг MPA по id не найден, таблица доступных видов рейтинга MPA: " + mpaRatingMap +  ". " +
+                        name + " не возвращён. ";
             } else if (!isMpa && genreNotFoundCheck(propId[0])) {
-                excMsg = "Жанр по id не найден, таблица доступных жанров: " + filmGenresMap +  ". " + name + " не возвращён. ";
+                excMsg = "Жанр по id не найден, таблица доступных жанров: " + filmGenresMap +  ". " +
+                        name + " не возвращён. ";
             }
             if (!excMsg.isBlank()) {
                 log.info("Ошибка поиска объектов. " + excMsg);
@@ -101,9 +106,10 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film, User> {
         return Map.of(propId[0], workingMap.get(propId[0]));
     }
 
-    //  Метод проверяет существование жанров по одному id или по коллекции id и при отсутствии выбрасывает исключение EntityNotFoundException
+    //  Метод проверяет существование жанров по одному id или по коллекции id
+    //  и при отсутствии выбрасывает исключение EntityNotFoundException
     @SafeVarargs
-    public final boolean genreNotFoundCheck(int genreId, TreeSet<Integer>... genreIdSet) {
+    public static boolean genreNotFoundCheck(int genreId, TreeSet<Integer>... genreIdSet) {
         String excMsg = "Ошибка поиска объектов. Жанр по id не найден, таблица доступных жанров: " + filmGenresMap + ". ";
         boolean isGenreError = false;
 
@@ -135,8 +141,9 @@ public class InMemoryFilmStorage extends InMemoryEntityStorage<Film, User> {
     }
 
     //  Метод проверяет существование MPA рейтингов по id и при отсутствии выбрасывает исключение EntityNotFoundException
-    public boolean mpaNotFoundCheck(Integer mpaId) {
-        String excMsg = "Ошибка поиска объектов. MPA рейтинг по id не найден, таблица доступных вариантов MPA рейтинга: " + mpaRatingMap + ". ";
+    public static boolean mpaNotFoundCheck(Integer mpaId) {
+        String excMsg = "Ошибка поиска объектов. MPA рейтинг по id не найден, " +
+                "таблица доступных вариантов MPA рейтинга: " + mpaRatingMap + ". ";
         boolean isMpaError = false;
 
         if (mpaId != null && (mpaId <= 0 || mpaId > mpaRatingMap.size())) {

@@ -10,12 +10,12 @@ import java.util.ArrayList;
 public abstract class StorageController<T extends Entity, V extends Entity> {
     EntityDbService<T, V> dbService;
 
-    @PostMapping()
+    @PostMapping
     public Entity createEntityController(@RequestBody T entity) {
         return dbService.createEntityDb(entity);
     }
 
-    @PutMapping()
+    @PutMapping
     public Entity updateEntityController(@RequestBody T entity) {
         return dbService.updateEntityDb(entity);
     }
@@ -35,7 +35,7 @@ public abstract class StorageController<T extends Entity, V extends Entity> {
         return dbService.getEntityByIdDb(entityId);
     }
 
-    @GetMapping()
+    @GetMapping
     public ArrayList<T> getAllEntityController() {
         return dbService.getAllEntityDb();
     }

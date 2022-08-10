@@ -23,7 +23,9 @@ public class FilmDbStorage extends EntityDbStorage<Film, User> {
 
     // Метод для загрузки таблиц MPA рейтинга и жанров из БД
     private void mpaAndGenresInitializeFromDB() {
-        crudDbSimpleDataMap("mpa_rating", InMemoryFilmStorage.getMpaRatingMap(), null, true, false);
-        crudDbSimpleDataMap("genres", InMemoryFilmStorage.getFilmGenresMap(), null, true, false);
+        crudDbSimpleDataMap("mpa_rating", InMemoryFilmStorage.getMpaRatingMap(),
+                null, true, false);
+        crudDbSimpleDataMap("genres", InMemoryFilmStorage.getFilmGenresMap(),
+                null, true, false);
     }
 }

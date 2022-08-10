@@ -60,7 +60,8 @@ public abstract class EntityDbService<T extends Entity, V extends Entity> {
         for (Integer dataId : inMemoryService.getWorkingConnectionsMap().get(parentId)) {
             connectionDataMap.put(parentId, dataId);
         }
-        EntityDbStorage.crudDbSimpleDataMap(connectionTableNameDb, connectionDataMap, null, false, false, parentId);
+        EntityDbStorage.crudDbSimpleDataMap(connectionTableNameDb, connectionDataMap,
+                null, false, false, parentId);
     }
 
 
@@ -70,7 +71,8 @@ public abstract class EntityDbService<T extends Entity, V extends Entity> {
             return;
         }
         inMemoryService.removeConnection(parentId, childId, isTwoWayConnection, isNotSameKindEntity);
-        EntityDbStorage.crudDbSimpleDataMap(connectionTableNameDb, null, null, false, true, parentId, childId);
+        EntityDbStorage.crudDbSimpleDataMap(connectionTableNameDb, null, null,
+                false, true, parentId, childId);
     }
 
 
@@ -78,14 +80,18 @@ public abstract class EntityDbService<T extends Entity, V extends Entity> {
     private boolean prepareConnectionData(int parentId, int childId, boolean isNotSameKindEntity) {
         if (!isNotSameKindEntity) {
             if (parentId == childId) {
-                log.info("Попытка создания или удаления связи в БД между объектами одного вида с одинаковым id " + parentId + ". Обработка прервана.");
+                log.info("Попытка создания или удаления связи в БД между объектами одного вида с одинаковым id "
+                        + parentId + ". Обработка прервана.");
                 return false;
             }
-            dbStorage.loadEntityFromDb(dbStorage.getSameKindDbTableName(), dbStorage.getInMemoryStorage().getSameKindEntityMap(), childId);
+            dbStorage.loadEntityFromDb(dbStorage.getSameKindDbTableName(),
+                    dbStorage.getInMemoryStorage().getSameKindEntityMap(), childId);
         } else {
-            dbStorage.loadEntityFromDb(dbStorage.getOtherKindDbTableName(), dbStorage.getInMemoryStorage().getOtherKindEntityMap(), childId);
+            dbStorage.loadEntityFromDb(dbStorage.getOtherKindDbTableName(),
+                    dbStorage.getInMemoryStorage().getOtherKindEntityMap(), childId);
         }
-        dbStorage.loadEntityFromDb(dbStorage.getSameKindDbTableName(), dbStorage.getInMemoryStorage().getSameKindEntityMap(), parentId);
+        dbStorage.loadEntityFromDb(dbStorage.getSameKindDbTableName(),
+                dbStorage.getInMemoryStorage().getSameKindEntityMap(), parentId);
         return true;
     }
 

@@ -114,7 +114,8 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
     }
 
     public ArrayList<T> getAllEntity() {
-        log.info("Из памяти возвращён список тип - " + entityName + ". Количество объектов " + sameKindEntityMap.size() + ".");
+        log.info("Из памяти возвращён список тип - " + entityName + ". " +
+                "Количество объектов " + sameKindEntityMap.size() + ".");
         return new ArrayList<>(sameKindEntityMap.values());
     }
 
@@ -150,7 +151,8 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
         }
         if (childId.length == 1) {
             if (!childCheckMap.containsKey(childId[0])) {
-                excMsg += "Объект с id " + childId[0] + ", который инициировал действие связанное с " + actionName + " в памяти не найден. ";
+                excMsg += "Объект с id " + childId[0] + ", который инициировал действие связанное с " +
+                        actionName + " в памяти не найден. ";
             }
         }
         if (excMsg.length() > 0) {

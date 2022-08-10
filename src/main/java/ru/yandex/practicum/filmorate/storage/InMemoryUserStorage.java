@@ -27,10 +27,12 @@ public class InMemoryUserStorage extends InMemoryEntityStorage<User, Film> {
         if (user.getUserName() == null || user.getUserName().isEmpty()) {
             user.setUserName(user.getLogin());
         }
-        if (user.getEmail() == null || !Pattern.compile("^[A-Z\\d._%+-]+@[A-Z\\d.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE).matcher(user.getEmail()).find()) {
+        if (user.getEmail() == null || !Pattern.compile("^[A-Z\\d._%+-]+@[A-Z\\d.-]+\\.[A-Z]{2,6}$",
+                Pattern.CASE_INSENSITIVE).matcher(user.getEmail()).find()) {
             excMsg += "Адрес электронной почты должен быть задан и иметь верный формат. ";
         }
-        if (user.getLogin() == null || !Pattern.compile("^[a-zA-Z\\d._-]{3,}$", Pattern.CASE_INSENSITIVE).matcher(user.getLogin()).find()) {
+        if (user.getLogin() == null || !Pattern.compile("^[a-zA-Z\\d._-]{3,}$",
+                Pattern.CASE_INSENSITIVE).matcher(user.getLogin()).find()) {
             excMsg += "Логин должен быть задан и состоять только из a-z, A-Z, 0-9, точек, тире и подчёркиваний. ";
         }
         if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {

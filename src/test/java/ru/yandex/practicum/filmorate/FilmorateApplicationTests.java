@@ -5,14 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dao.service.FilmDbService;
 import ru.yandex.practicum.filmorate.dao.service.UserDbService;
 import ru.yandex.practicum.filmorate.dao.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.storage.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -27,23 +25,19 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase
 class FilmorateApplicationTests {
 
-    UserService userService;
-    FilmService filmService;
-    UserDbService userDbService;
-    FilmDbService filmDbService;
+    private final UserService userService;
+    private final FilmService filmService;
+    private final UserDbService userDbService;
+    private final FilmDbService filmDbService;
 
 
     @Autowired
-    public FilmorateApplicationTests(UserService userService, FilmService filmService, UserDbService userDbService, FilmDbService filmDbService) {
+    public FilmorateApplicationTests(UserService userService, FilmService filmService,
+                                     UserDbService userDbService, FilmDbService filmDbService) {
         this.userService = userService;
         this.filmService = filmService;
         this.userDbService = userDbService;
         this.filmDbService = filmDbService;
-    }
-
-    @GetMapping
-    public @ResponseBody <T extends Entity> T getObjToJSONString(T entity) {
-        return entity;
     }
 
 
@@ -58,8 +52,10 @@ class FilmorateApplicationTests {
         User userFromMap;
 
         // Тесты на создание пользователей
-        assertEquals(0, userService.getSameKindEntityMap().size(), "На начало тестов таблица пользователей не пустая");
-        assertEquals(List.of(), userDbService.getAllEntityDb(), "На начало тестов БД пользователей не пустая");
+        assertEquals(0, userService.getSameKindEntityMap().size(),
+                "На начало тестов таблица пользователей не пустая");
+        assertEquals(List.of(), userDbService.getAllEntityDb(), "" +
+                "На начало тестов БД пользователей не пустая");
 
         User user0 = User.builder()
                 .login(userLogin)
@@ -69,8 +65,10 @@ class FilmorateApplicationTests {
                 .build();
 
         userDbService.createEntityDb(user0);
-        assertTrue(userService.getSameKindEntityMap().containsKey(1), "Созданный пользователь не найден в памяти по id 1)");
-        assertTrue(userDbService.getAllEntityDb().contains(user0), "Созданный пользователь не найден в БД");
+        assertTrue(userService.getSameKindEntityMap().containsKey(1),
+                "Созданный пользователь не найден в памяти по id 1)");
+        assertTrue(userDbService.getAllEntityDb().contains(user0),
+                "Созданный пользователь не найден в БД");
 
         userFromMap = userService.getSameKindEntityMap().get(1);
 
@@ -85,8 +83,10 @@ class FilmorateApplicationTests {
         userName = "";
         userBirthDate = LocalDate.of(2002, 2, 2);
 
-        assertEquals(1, userService.getSameKindEntityMap().size(), "Перед созданием второго пользователя в таблице не один пользователь");
-        assertEquals(1, userDbService.getAllEntityDb().size(), "Перед созданием второго пользователя в БД не один пользователь");
+        assertEquals(1, userService.getSameKindEntityMap().size(),
+                "Перед созданием второго пользователя в таблице не один пользователь");
+        assertEquals(1, userDbService.getAllEntityDb().size(),
+                "Перед созданием второго пользователя в БД не один пользователь");
 
         User user01 = User.builder()
                 .login(userLogin)
@@ -97,8 +97,10 @@ class FilmorateApplicationTests {
 
         userDbService.createEntityDb(user01);
 
-        assertTrue(userService.getSameKindEntityMap().containsKey(2), "Второй созданный пользователь не найден в памяти по id 2)");
-        assertTrue(userDbService.getAllEntityDb().contains(user01), "Второй созданный пользователь с id " + user01.getId() + " не найден в БД");
+        assertTrue(userService.getSameKindEntityMap().containsKey(2),
+                "Второй созданный пользователь не найден в памяти по id 2)");
+        assertTrue(userDbService.getAllEntityDb().contains(user01),
+                "Второй созданный пользователь с id " + user01.getId() + " не найден в БД");
 
         userFromMap = userService.getSameKindEntityMap().get(2);
 
@@ -107,8 +109,10 @@ class FilmorateApplicationTests {
         assertEquals(userEmail, userFromMap.getEmail(), "e-mail пользователя2 не совпадает");
         assertEquals(userBirthDate, userFromMap.getBirthday(), "Дата рождения пользователя2 не совпадает");
 
-        assertEquals(2, userService.getSameKindEntityMap().size(), "После создания второго пользователя в таблице не два пользователя");
-        assertEquals(2, userDbService.getAllEntityDb().size(), "После создания второго пользователя в БД не два пользователя");
+        assertEquals(2, userService.getSameKindEntityMap().size(),
+                "После создания второго пользователя в таблице не два пользователя");
+        assertEquals(2, userDbService.getAllEntityDb().size(),
+                "После создания второго пользователя в БД не два пользователя");
 
 
         // Тесты на валидацию при создании пользователей с выбросом исключений
@@ -248,10 +252,14 @@ class FilmorateApplicationTests {
 
         userFromMap = userService.getSameKindEntityMap().get(userId);
 
-        assertTrue(userService.getSameKindEntityMap().containsKey(userId), "Обновлённый пользователь не найден в памяти по id " + userId);
-        assertEquals(updatingUserName, userFromMap.getUserName(), "Обновлённое имя пользователя не совпадает");
-        assertEquals(updatingUserEmail, userFromMap.getEmail(), "Обновлённый и-мэйл пользователя не совпадает");
-        assertTrue(userDbService.getAllEntityDb().contains(user1), "Обновлённый пользователь с id " + user1.getId() + " не найден в БД");
+        assertTrue(userService.getSameKindEntityMap().containsKey(userId),
+                "Обновлённый пользователь не найден в памяти по id " + userId);
+        assertEquals(updatingUserName, userFromMap.getUserName(),
+                "Обновлённое имя пользователя не совпадает");
+        assertEquals(updatingUserEmail, userFromMap.getEmail(),
+                "Обновлённый и-мэйл пользователя не совпадает");
+        assertTrue(userDbService.getAllEntityDb().contains(user1),
+                "Обновлённый пользователь с id " + user1.getId() + " не найден в БД");
 
         // тест на проверку ошибочного id обновляемого пользователя
         userEmail = "email@User2.ru";
@@ -315,9 +323,11 @@ class FilmorateApplicationTests {
                 "При попытке вернуть из БД пользователя с несуществующим id не выброшено исключение");
 
         assertEquals(List.of(userService.getSameKindEntityMap().get(1), userService.getSameKindEntityMap().get(2),
-                        userService.getSameKindEntityMap().get(3)), userService.getAllEntity(), "Возвращаемые объекты всех пользователей не совпадает");
+                        userService.getSameKindEntityMap().get(3)), userService.getAllEntity(),
+                "Возвращаемые объекты всех пользователей не совпадает");
         assertEquals(List.of(userService.getSameKindEntityMap().get(1), userService.getSameKindEntityMap().get(2),
-                userService.getSameKindEntityMap().get(3)), userDbService.getAllEntityDb(), "Возвращаемые объекты всех пользователей из БД не совпадает");
+                userService.getSameKindEntityMap().get(3)), userDbService.getAllEntityDb(),
+                "Возвращаемые объекты всех пользователей из БД не совпадает");
 
         // тесты работы в БД со связями пользователей тип друзья
         List<Integer> tempList = new ArrayList<>();
@@ -333,9 +343,11 @@ class FilmorateApplicationTests {
         assertEquals(3, tempList.size(), "После добавления трёх связей в БД друзей не три связи");
         tempList.clear();
 
-        assertThrows(EntityNotFoundException.class, () -> userDbService.addConnectionDb(-1, 2, false, false),
+        assertThrows(EntityNotFoundException.class, ()
+                        -> userDbService.addConnectionDb(-1, 2, false, false),
                 "При попытке создать связь Друзья с несуществующим id пользователя не выброшено исключение");
-        assertThrows(EntityNotFoundException.class, () -> userDbService.addConnectionDb(2, -1, false, false),
+        assertThrows(EntityNotFoundException.class, ()
+                        -> userDbService.addConnectionDb(2, -1, false, false),
                 "При попытке создать связь Друзья с несуществующим id инициатора не выброшено исключение");
 
         userDbService.addConnectionDb(1, 1, false, false);
@@ -343,8 +355,10 @@ class FilmorateApplicationTests {
         assertEquals(3, tempList.size(), "При попытке создать связь Друзья с одинаковыми id в БД друзей не три связи");
         tempList.clear();
 
-        assertEquals(userService.getFriendsByUserId(1), userDbService.getFriendsByUserIdDb(1), "Возвращаемые объекты друзей для пользователя с id 1 из БД не совпадают");
-        assertEquals(List.of(userService.getSameKindEntityMap().get(2), userService.getSameKindEntityMap().get(3)), userDbService.getFriendsByUserIdDb(1),
+        assertEquals(userService.getFriendsByUserId(1), userDbService.getFriendsByUserIdDb(1),
+                "Возвращаемые объекты друзей для пользователя с id 1 из БД не совпадают");
+        assertEquals(List.of(userService.getSameKindEntityMap().get(2),
+                        userService.getSameKindEntityMap().get(3)), userDbService.getFriendsByUserIdDb(1),
                 "Возвращаемые объекты друзей для пользователя с id 1 не пользователи с id 2 и 3");
         assertThrows(EntityNotFoundException.class, () -> userDbService.getEntityByIdDb(-1),
                 "При попытке вернуть из БД объекты друзей по id несуществующего пользователя не выброшено исключение");
@@ -353,8 +367,10 @@ class FilmorateApplicationTests {
                 "Возвращаемые объекты общих друзей для пользователя с id 1 и 2 из БД не совпадают");
         assertEquals(List.of(userService.getSameKindEntityMap().get(3)), userDbService.getCommonFriendsDb(1, 2),
                 "Возвращаемый объект общих друзей друзей для пользователя с id 1 и 2 не пользователь с id 3");
-        assertEquals(List.of(userService.getSameKindEntityMap().get(2), userService.getSameKindEntityMap().get(3)), userDbService.getCommonFriendsDb(1, 1),
-                "При попытке вернуть из БД объекты общих друзей с одинаковыми id не возвращены объекты друзей для пользователя с этим id");
+        assertEquals(List.of(userService.getSameKindEntityMap().get(2), userService.getSameKindEntityMap().get(3)),
+                userDbService.getCommonFriendsDb(1, 1),
+                "При попытке вернуть из БД объекты общих друзей с одинаковыми id " +
+                        "не возвращены объекты друзей для пользователя с этим id");
 
         assertThrows(EntityNotFoundException.class, () -> userDbService.getCommonFriendsDb(-1, 2),
                 "При попытке вернуть из БД объекты общих друзей по id несуществующего пользователя не выброшено исключение");
@@ -461,9 +477,12 @@ class FilmorateApplicationTests {
 
         filmDbService.createEntityDb(filmWithGenres);
 
-        assertEquals(3, filmDbService.getAllEntityDb().size(), "После создания третьего фильма с жанрами и без MPA, в БД не три фильма");
-        assertEquals(0, filmService.getSameKindEntityMap().get(3).getMpaRatingId(), "После создания третьего фильма с жанрами и без MPA, MPA не 0");
-        assertEquals(Set.of(1, 2 ,3), filmService.getSameKindEntityMap().get(3).getGenreIdSet(), "После создания третьего фильма с жанрами и без MPA, id жанров не соответствуют 1, 2, 3");
+        assertEquals(3, filmDbService.getAllEntityDb().size(),
+                "После создания третьего фильма с жанрами и без MPA, в БД не три фильма");
+        assertEquals(0, filmService.getSameKindEntityMap().get(3).getMpaRatingId(),
+                "После создания третьего фильма с жанрами и без MPA, MPA не 0");
+        assertEquals(Set.of(1, 2 ,3), filmService.getSameKindEntityMap().get(3).getGenreIdSet(),
+                "После создания третьего фильма с жанрами и без MPA, id жанров не соответствуют 1, 2, 3");
 
         // Тесты на валидацию при создании фильмов с выбросом исключений
         filmName = "";
@@ -592,12 +611,18 @@ class FilmorateApplicationTests {
 
         filmFromMap = filmService.getSameKindEntityMap().get(filmId);
 
-        assertTrue(filmService.getSameKindEntityMap().containsKey(filmId), "Обновлённый фильм не найден в памяти по id " + filmId);
-        assertEquals(updatingFilmName, filmFromMap.getFilmName(), "Обновлённое название фильма не совпадает");
-        assertEquals(updatingFilmDesc, filmFromMap.getDescription(), "Обновлённое описание фильма не совпадает");
-        assertEquals(updatingFilmReleaseDate, filmFromMap.getReleaseDate(), "Обновлённая дата релиза фильма не совпадает");
-        assertEquals(updatingFilmDuration, filmFromMap.getDuration(), "Обновлённая длительность фильма не совпадает");
-        assertTrue(filmDbService.getAllEntityDb().contains(film1), "Обновлённый фильм с id " + film1.getId() +  " не найден в БД");
+        assertTrue(filmService.getSameKindEntityMap().containsKey(filmId),
+                "Обновлённый фильм не найден в памяти по id " + filmId);
+        assertEquals(updatingFilmName, filmFromMap.getFilmName(),
+                "Обновлённое название фильма не совпадает");
+        assertEquals(updatingFilmDesc, filmFromMap.getDescription(),
+                "Обновлённое описание фильма не совпадает");
+        assertEquals(updatingFilmReleaseDate, filmFromMap.getReleaseDate(),
+                "Обновлённая дата релиза фильма не совпадает");
+        assertEquals(updatingFilmDuration, filmFromMap.getDuration(),
+                "Обновлённая длительность фильма не совпадает");
+        assertTrue(filmDbService.getAllEntityDb().contains(film1),
+                "Обновлённый фильм с id " + film1.getId() +  " не найден в БД");
 
         // тест на проверку ошибочного id обновляемого фильма
         filmId = -1;
@@ -644,10 +669,12 @@ class FilmorateApplicationTests {
         assertThrows(EntityNotFoundException.class, () -> filmDbService.getEntityByIdDb(-1),
                 "При попытке вернуть из БД фильм с несуществующим id не выброшено исключение");
 
-        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2), filmService.getSameKindEntityMap().get(3)),
-                filmService.getAllEntity(), "Возвращаемые объекты всех фильмов не совпадает");
-        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2), filmService.getSameKindEntityMap().get(3)),
-                filmDbService.getAllEntityDb(), "Возвращаемые объекты всех фильмов из БД не совпадает");
+        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2),
+                        filmService.getSameKindEntityMap().get(3)), filmService.getAllEntity(),
+                "Возвращаемые объекты всех фильмов не совпадает");
+        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2),
+                        filmService.getSameKindEntityMap().get(3)), filmDbService.getAllEntityDb(),
+                "Возвращаемые объекты всех фильмов из БД не совпадает");
 
         // тесты работы в БД со связями фильмов тип лайк
         List<Integer> tempList = new ArrayList<>();
@@ -663,28 +690,37 @@ class FilmorateApplicationTests {
         assertEquals(3, tempList.size(), "После добавления трёх связей в БД лайков не три связи");
         tempList.clear();
 
-        assertThrows(EntityNotFoundException.class, () -> filmDbService.addConnectionDb(-1, 2, false, true),
+        assertThrows(EntityNotFoundException.class, ()
+                        -> filmDbService.addConnectionDb(-1, 2, false, true),
                 "При попытке создать связь Лайк с несуществующим id фильма не выброшено исключение");
-        assertThrows(EntityNotFoundException.class, () -> filmDbService.addConnectionDb(2, -1, false, true),
+        assertThrows(EntityNotFoundException.class, ()
+                        -> filmDbService.addConnectionDb(2, -1, false, true),
                 "При попытке создать связь связь Лайк с несуществующим id инициатора пользователя не выброшено исключение");
 
-        assertEquals(filmService.getTopFilms(5), filmDbService.getTopFilmsDb(5), "Возвращаемые объекты топа фильмов из БД не совпадают");
-        assertEquals(List.of(filmService.getSameKindEntityMap().get(2), filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(3)),
-                filmDbService.getTopFilmsDb(5), "Возвращаемый топ фильмов не содержит объекты фильмов с последовательностью id 2, 1, 3");
+        assertEquals(filmService.getTopFilms(5), filmDbService.getTopFilmsDb(5),
+                "Возвращаемые объекты топа фильмов из БД не совпадают");
+        assertEquals(List.of(filmService.getSameKindEntityMap().get(2), filmService.getSameKindEntityMap().get(1),
+                        filmService.getSameKindEntityMap().get(3)), filmDbService.getTopFilmsDb(5),
+                "Возвращаемый топ фильмов не содержит объекты фильмов с последовательностью id 2, 1, 3");
 
-        assertEquals(2, filmDbService.getTopFilmsDb(2).size(), "Возвращаемый топ фильмов с ограничением по количеству возвращает список размером не 2");
-        assertEquals(List.of(filmService.getSameKindEntityMap().get(2), filmService.getSameKindEntityMap().get(1)), filmDbService.getTopFilmsDb(2),
+        assertEquals(2, filmDbService.getTopFilmsDb(2).size(),
+                "Возвращаемый топ фильмов с ограничением по количеству возвращает список размером не 2");
+        assertEquals(List.of(filmService.getSameKindEntityMap().get(2), filmService.getSameKindEntityMap().get(1)),
+                filmDbService.getTopFilmsDb(2),
                 "Возвращаемый топ фильмов не содержит объекты фильмов с последовательностью id 2, 1");
 
         filmDbService.removeConnectionDb(2, 2, false, true);
-        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2), filmService.getSameKindEntityMap().get(3)), filmDbService.getTopFilmsDb(5),
-                "После удаления связи лайк из БД для фильма с id 2 от пользователя с id 2, возвращаемый топ 5 не соответствует новой последовательности id 1, 2, 3");
+        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2),
+                        filmService.getSameKindEntityMap().get(3)), filmDbService.getTopFilmsDb(5),
+                "После удаления связи лайк из БД для фильма с id 2 от пользователя с id 2, " +
+                        "возвращаемый топ 5 не соответствует новой последовательности id 1, 2, 3");
 
         filmDbService.deleteEntityByIdDb(3);
         assertThrows(EntityNotFoundException.class, () -> filmDbService.getEntityByIdDb(3),
                 "После удаления из БД фильма с id 3, при попытке получить его по id не выброшено исключение");
-        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2)), filmDbService.getTopFilmsDb(5),
-                "После удаления из БД фильма с id 3, возвращаемый топ 5 не соответствует новой последовательности id 1, 2");
+        assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2)),
+                filmDbService.getTopFilmsDb(5), "После удаления из БД фильма с id 3, " +
+                        "возвращаемый топ 5 не соответствует новой последовательности id 1, 2");
 
 
     }

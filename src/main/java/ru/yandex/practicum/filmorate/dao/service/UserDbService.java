@@ -35,15 +35,19 @@ public class UserDbService extends EntityDbService <User, Film>{
         log.info("База данных таблица - friends. Общее количество строк в базе " + rowCount + ".");
 
         sql = String.format("SELECT COUNT (*) FROM \"users\" WHERE \"users\".\"user_id\" " +
-                "IN (SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends WHERE friends.\"user_id\" = %s)", userId);
+                "IN (SELECT friends.\"friend_id\" FROM \"user_user_friends\" " +
+                "AS friends WHERE friends.\"user_id\" = %s)", userId);
         rowCount = EntityDbStorage.getJdbcTemplate().queryForObject(sql, Integer.class);
 
 
         if (rowCount > 0) {
             sql = String.format("SELECT * FROM \"users\" WHERE \"users\".\"user_id\" " +
-                    "IN (SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends WHERE friends.\"user_id\" = %s)", userId);
-            EntityDbStorage.getJdbcTemplate().query(sql, (resSet, rowNum) -> userFriendsList.add(dbStorage.convertResSetToEntity(resSet, true)));
-            log.info("Для Пользователя с id " + userId + " из БД возвращён список друзей. Количество строк " + rowCount + ".");
+                    "IN (SELECT friends.\"friend_id\" FROM \"user_user_friends\" " +
+                    "AS friends WHERE friends.\"user_id\" = %s)", userId);
+            EntityDbStorage.getJdbcTemplate().query(sql, (resSet, rowNum)
+                    -> userFriendsList.add(dbStorage.convertResSetToEntity(resSet, true)));
+            log.info("Для Пользователя с id " + userId +
+                    " из БД возвращён список друзей. Количество строк " + rowCount + ".");
         } else {
             log.info("Для Пользователя с id " + userId + " в БД друзья не найдены.");
         }
@@ -52,7 +56,8 @@ public class UserDbService extends EntityDbService <User, Film>{
 
     // Метод возвращает из БД список общих друзей по id обоих пользователей
     public ArrayList<User> getCommonFriendsDb(int userId, int otherUserId) {
-        inMemoryService.entityNotFoundCheck("Список общих друзей не возвращён из БД.", userId, false, otherUserId);
+        inMemoryService.entityNotFoundCheck("Список общих друзей не возвращён из БД.",
+                userId, false, otherUserId);
         String sql;
         int rowCount;
         ArrayList<User> commonFriendsList = new ArrayList<>();
@@ -61,15 +66,22 @@ public class UserDbService extends EntityDbService <User, Film>{
         rowCount = EntityDbStorage.getJdbcTemplate().queryForObject(sql, Integer.class);
         log.info("База данных таблица - friends. Общее количество строк в базе " + rowCount + ".");
 
-        sql = String.format("SELECT COUNT (*) FROM \"users\" WHERE \"users\".\"user_id\" IN (SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends WHERE friends.\"user_id\" = %s" +
-                "INTERSECT SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends WHERE friends.\"user_id\" = %s)", userId, otherUserId);
+        sql = String.format("SELECT COUNT (*) FROM \"users\" WHERE \"users\".\"user_id\" " +
+                "IN (SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends WHERE friends.\"user_id\" = %s" +
+                "INTERSECT SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends " +
+                "WHERE friends.\"user_id\" = %s)", userId, otherUserId);
         rowCount = EntityDbStorage.getJdbcTemplate().queryForObject(sql, Integer.class);
 
         if (rowCount > 0) {
-            sql = String.format("SELECT * FROM \"users\" WHERE \"users\".\"user_id\" IN (SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends WHERE friends.\"user_id\" = %s" +
-                    "INTERSECT SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends WHERE friends.\"user_id\" = %s)", userId, otherUserId);
-            EntityDbStorage.getJdbcTemplate().query(sql, (resSet, rowNum) -> commonFriendsList.add(dbStorage.convertResSetToEntity(resSet, true)));
-            log.info("Для Пользователей с id " + userId + " и " + otherUserId + " из БД возвращён список общих друзей. Количество строк " + rowCount + ".");
+            sql = String.format("SELECT * FROM \"users\" WHERE \"users\".\"user_id\" " +
+                    "IN (SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends " +
+                    "WHERE friends.\"user_id\" = %s" +
+                    "INTERSECT SELECT friends.\"friend_id\" FROM \"user_user_friends\" AS friends " +
+                    "WHERE friends.\"user_id\" = %s)", userId, otherUserId);
+            EntityDbStorage.getJdbcTemplate().query(sql, (resSet, rowNum)
+                    -> commonFriendsList.add(dbStorage.convertResSetToEntity(resSet, true)));
+            log.info("Для Пользователей с id " + userId + " и " + otherUserId +
+                    " из БД возвращён список общих друзей. Количество строк " + rowCount + ".");
         } else {
             log.info("Для Пользователей с id " + userId + " и " + otherUserId + " в БД общие друзья не найдены.");
         }

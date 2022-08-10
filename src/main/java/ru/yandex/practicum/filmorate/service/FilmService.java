@@ -49,7 +49,8 @@ public class FilmService extends EntityService<Film, User> {
             limit = 10;
         }
 
-        // дополнительно добавить в топ фильмов по лайкам все фильмы без лайков, потому что наставник, который писал тесты считает что это логично
+        // дополнительно добавить в топ фильмов по лайкам все фильмы без лайков, потому что наставник,
+        // который писал тесты считает что это логично
         for (Integer filmId : inMemoryFilmStorage.getSameKindEntityMap().keySet()) {
             if (!workingConnectionsMap.containsKey(filmId)) {
                 workingConnectionsMap.put(filmId, new LinkedHashSet<>());

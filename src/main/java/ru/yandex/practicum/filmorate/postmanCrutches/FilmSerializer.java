@@ -30,7 +30,8 @@ public class FilmSerializer extends JsonSerializer<Film> {
         jGen.writeStringField("description", film.getDescription());
         jGen.writeStringField("releaseDate", String.valueOf(film.getReleaseDate()));
         jGen.writeNumberField("duration", film.getDuration());
-        jGen.writePOJOField("mpa", new PlugObject(film.getMpaRatingId(), InMemoryFilmStorage.getMpaRatingMap().get(film.getMpaRatingId())));
+        jGen.writePOJOField("mpa", new PlugObject(film.getMpaRatingId(),
+                InMemoryFilmStorage.getMpaRatingMap().get(film.getMpaRatingId())));
         jGen.writePOJOField("genres", genresObjList);
         jGen.writeEndObject();
     }
