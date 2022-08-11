@@ -61,6 +61,7 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
 
         if (maxId != null && maxId > inMemoryStorage.getStartId()) {
             inMemoryStorage.setStartId(maxId);
+
             log.info("В БД таблице " + sameKindDbTableName + " найдено строк: " + rowCount + ". " +
                     "По максимальному значению id из БД установлено стартовое значение id в памяти "
                     + inMemoryStorage.getStartId() + ".");
@@ -74,14 +75,12 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
         return newEntity;
     }
 
-
     public T updateEntity(T entity) {
         findAndGetEntityFromDb(entity);
         T updatedEntity = inMemoryStorage.updateEntity(entity);
         saveEntityToDb(updatedEntity, true);
         return updatedEntity;
     }
-
 
     public void deleteEntityById(int entityId) {
         String columnName = "";
@@ -91,13 +90,13 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
         } else if (sameKindDbTableName.contains("film")) {
             columnName = "film_id";
         }
-        String sql = String.format("DELETE FROM \"%s\" WHERE \"%s\" = '%s'", sameKindDbTableName, columnName, entityId);
 
+        String sql = String.format("DELETE FROM \"%s\" WHERE \"%s\" = '%s'", sameKindDbTableName, columnName, entityId);
         jdbcTemplate.update(sql);
+
         log.info("Удалены данные объекта с id " + entityId + " из базы данных таблица - " + sameKindDbTableName + ". ");
         inMemoryStorage.deleteEntityById(entityId);
     }
-
 
     public void deleteAllEntity() {
         String sql = String.format("DELETE FROM \"%s\"", sameKindDbTableName);
@@ -106,18 +105,15 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
         inMemoryStorage.deleteAllEntity();
     }
 
-
     public T getEntityById(int entityId) {
         loadEntityFromDb(sameKindDbTableName, inMemoryStorage.getSameKindEntityMap(), entityId);
         return inMemoryStorage.getEntityById(entityId);
     }
 
-
     public ArrayList<T> getAllEntity() {
         loadEntityFromDb(sameKindDbTableName, inMemoryStorage.getSameKindEntityMap());
         return inMemoryStorage.getAllEntity();
     }
-
 
     // Метод сохраняет в БД, загружает и удаляет из БД примитивы и строки из определённой таблицы с двумя столбцами
     public static void crudDbSimpleDataMap(String tableNameFromDb, Map inMemoryMap, List inMemoryList,
@@ -140,12 +136,14 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                 sql = String.format("SELECT COUNT(*) FROM \"%s\"", tableNameFromDb);
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
                 log.info("База данных тип - " + tableNameFromDb + ". Количество строк в базе " + rowCount + ".");
+
                 sql = String.format("SELECT * FROM \"%s\"", tableNameFromDb);
             } else if (entityId.length == 1) {
                 sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDb, columnName, entityId[0]);
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
                 log.info("База данных тип - " + tableNameFromDb + ". Количество строк с id " + entityId[0] +
                         " найденных в базе " + rowCount + ".");
+
                 sql = String.format("SELECT * FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDb, columnName, entityId[0]);
             } else if (entityId.length == 2) {
                 sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb,
@@ -153,9 +151,11 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
                 log.info("База данных тип - " + tableNameFromDb + ". Количество строк с сочетанием id " + entityId[0] +
                         " и " + entityId[1] + " найденных в базе " + rowCount + ".");
+
                 sql = String.format("SELECT * FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName,
                         entityId[0], otherColumnName, entityId[1]);
             }
+
             if (rowCount > 0 && (inMemoryMap != null || inMemoryList != null)) {
                 if (inMemoryMap != null) {
                     jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryMap.put(resSet.getInt(1),
@@ -164,12 +164,15 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                 if (inMemoryList != null) {
                     jdbcTemplate.query(sql, (resSet, rowNum) -> inMemoryList.add(resSet.getInt(2)));
                 }
+
                 log.info("Загружены данные из базы данных таблица - " + tableNameFromDb + ". " +
                         "Количество загруженных строк " + rowCount + ".");
             }
         }
+
         if (!isLoadFromDb & !isRemove) {
             int saveRowCount = 0;
+
             if (inMemoryMap.size() > 0) {
                 for (Object parentId : inMemoryMap.keySet()) {
                     sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s",
@@ -180,6 +183,7 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                         sql = String.format("INSERT INTO \"%s\" VALUES ('%s', '%s')", tableNameFromDb, parentId,
                                 inMemoryMap.get(parentId));
                         jdbcTemplate.update(sql);
+
                         saveRowCount++;
                         log.info("Сохранён ряд в базу данных таблица - " + tableNameFromDb +
                                 " с значениями " + parentId + " и " + inMemoryMap.get(parentId) + ". " +
@@ -192,17 +196,20 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                 }
             }
         }
+
         if (isRemove) {
             if (entityId.length == 0) {
                 sql = String.format("SELECT COUNT(*) FROM \"%s\"", tableNameFromDb);
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
                 log.info("База данных тип - " + tableNameFromDb + ". Количество строк в базе " + rowCount + ".");
+
                 sql = String.format("DELETE FROM \"%s\"", tableNameFromDb);
             } else if (entityId.length == 1) {
                 sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDb, columnName, entityId[0]);
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
                 log.info("База данных тип - " + tableNameFromDb + ". Количество строк с id " + entityId[0] +
                         " найденных в базе " + rowCount + ".");
+
                 sql = String.format("DELETE FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDb, columnName, entityId[0]);
             } else if (entityId.length == 2) {
                 sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb,
@@ -210,6 +217,7 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                 rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
                 log.info("База данных тип - " + tableNameFromDb + ". Количество строк с сочетанием id " + entityId[0] +
                         " и " + entityId[1] + " найденных в базе " + rowCount + ".");
+
                 sql = String.format("DELETE FROM \"%s\" WHERE \"%s\" = %s AND \"%s\" = %s", tableNameFromDb, columnName,
                         entityId[0], otherColumnName, entityId[1]);
             }
@@ -220,7 +228,6 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             }
         }
     }
-
 
     // Метод загружает в память все сущности из базы данных или одну сущность если задан id
     public void loadEntityFromDb(String tableNameFromDB, Map imMemoryMap, int... entityId) {
@@ -245,32 +252,36 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             sql = String.format("SELECT COUNT (*) FROM \"%s\" WHERE \"%s\" = %s",
                     tableNameFromDB, columnName, entityId[0]);
             rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
+
             sql = String.format("SELECT * FROM \"%s\" WHERE \"%s\" = %s", tableNameFromDB, columnName, entityId[0]);
+
             logMsg = "Загружена строка с id " + entityId[0] + " из базы данных таблица - " + tableNameFromDB + ". ";
         }
 
         if (rowCount > 0) {
             String finalColumnName = columnName;
+
             jdbcTemplate.query(sql, (resSet, rowNum) -> imMemoryMap.put(resSet.getInt(finalColumnName),
                     convertResSetToEntity(resSet, tableNameFromDB.contains("user"))));
             log.info(logMsg);
         }
     }
 
-
-    // При создании и обновлении объектов, для контроля за дубликатами сущностей по ключевым полям,
-    // метод ищет и при нахождении загружает в память сами сущности
-    //и их ключевые поля в соответствующие таблицы главных свойств: для пользователя - логин и e-mail,
-    // для фильма сочетание названия и даты выпуска
+    /*    При создании и обновлении объектов, для контроля за дубликатами сущностей по ключевым полям,
+        метод ищет и при нахождении загружает в память сами сущности
+        и их ключевые поля в соответствующие таблицы главных свойств: для пользователя - логин и e-mail,
+        для фильма сочетание названия и даты выпуска*/
     private void findAndGetEntityFromDb(Entity entity) {
         String sql = "";
         int rowCount = 0;
 
         if (entity.getClass() == User.class) {
             User user = (User) entity;
+
             sql = String.format("SELECT COUNT (*) FROM \"users\" WHERE \"user_email\" = '%s' OR \"user_login\" = '%s'",
                     user.getEmail(), user.getLogin());
             rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
+
             sql = String.format("SELECT * FROM \"users\" WHERE \"user_email\" = '%s' OR \"user_login\" = '%s'",
                     user.getEmail(), user.getLogin());
         }
@@ -279,6 +290,7 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             Film film = (Film) entity;
             sql = String.format("SELECT COUNT (*) FROM \"films\" WHERE \"film_name\" = '%s'", film.getFilmName());
             rowCount = jdbcTemplate.queryForObject(sql, Integer.class);
+
             sql = String.format("SELECT * FROM \"films\" WHERE \"film_name\" = '%s'", film.getFilmName());
         }
 
@@ -293,6 +305,7 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             jdbcTemplate.query(sql, (resSet, rowNum)
                     -> inMemoryStorage.getEntityMainPropMap().put(resSet.getString("user_login"),
                     resSet.getString("user_email")));
+
             log.info("При проверке найдены и загружены данные из базы данных таблица - Пользователи. " +
                     "Количество загруженных объектов " + rowCount + ".");
         }
@@ -305,12 +318,12 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                     -> inMemoryStorage.getEntityMainPropMap().put(resSet.getString("film_name") + ";" +
                             resSet.getString("film_release_date"),
                     resSet.getString("film_name") + ";" + resSet.getString("film_release_date")));
+
             log.info("При проверке найдены и загружены данные из базы данных таблица - Фильмы. " +
                     "Количество загруженных объектов " + rowCount + ".");
         }
 
     }
-
 
     // Метод сохраняет сущность в соответствующую таблицу БД при создании или обновлении
     private void saveEntityToDb(T entity, boolean isUpdate) {
@@ -330,9 +343,9 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
             sql = sqlKeyWord + " \"users\" (\"user_id\", \"user_email\", \"user_login\", \"user_birthdate\", \"user_name\")"
                     + " VALUES " + "('" + user.getId() + "', '" + user.getEmail() + "', '"
                     + user.getLogin() + "', '" + user.getBirthday() + "', '" + user.getUserName() + "');";
-
             jdbcTemplate.update(sql);
         }
+
         if (entity.getClass() == Film.class) {
             Film film = (Film) entity;
 
@@ -346,13 +359,13 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                         " \"film_desc\")" + " VALUES " + "('" + film.getId() + "', '" + film.getFilmName() + "', '"
                         + film.getDuration() + "', '" + film.getReleaseDate() + "', '" + film.getDescription() + "');";
             }
-
             jdbcTemplate.update(sql);
 
             if (sqlKeyWord.equals("MERGE INTO")) {
                 sql = "DELETE FROM \"film_genre\" WHERE \"film_id\" = " + film.getId();
                 jdbcTemplate.update(sql);
             }
+
             if (film.getGenreIdSet() != null && !film.getGenreIdSet().isEmpty()) {
                 for (int genreId : film.getGenreIdSet()) {
                     sql = "INSERT INTO \"film_genre\" (\"film_id\", \"genre_id\")" + " VALUES " +
@@ -365,7 +378,6 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
         log.info(entityName + " с id " + entityId + actionName);
     }
 
-
     // Метод преобразует данные из базы данных в объект Entity
     @SneakyThrows
     public T convertResSetToEntity(ResultSet resSet, boolean isUser) {
@@ -376,6 +388,7 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                     .birthday(resSet.getDate("user_birthdate").toLocalDate())
                     .userName(resSet.getString("user_name"))
                     .build();
+
             user.setId(resSet.getInt("user_id"));
             return (T) user;
         } else {
@@ -388,6 +401,7 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                     .description(resSet.getString("film_desc"))
                     .mpaRatingId(resSet.getInt("mpa_id"))
                     .build();
+
             film.setId(resSet.getInt("film_id"));
 
             sql = String.format("SELECT COUNT (*) FROM \"film_genre\" WHERE \"film_id\" = '%s'", film.getId());
@@ -397,14 +411,16 @@ public abstract class EntityDbStorage<T extends Entity, V extends Entity> {
                 if (film.getGenreIdSet() == null) {
                     film.setGenreIdSet(new TreeSet<>());
                 }
-                sql = String.format("SELECT \"genre_id\" FROM \"film_genre\" WHERE \"film_id\" = '%s'", film.getId());
 
+                sql = String.format("SELECT \"genre_id\" FROM \"film_genre\" WHERE \"film_id\" = '%s'", film.getId());
                 jdbcTemplate.query(sql, (resSetGenres, rowNum)
                         -> film.getGenreIdSet().add(resSetGenres.getInt("genre_id")));
+
                 log.info("Для фильма c id " + film.getId() + " найдены и загружены жанры из базы данных таблица - " +
                         "Фильм-Жанр. Количество загруженных жанров " + rowCount + ".");
             }
             return (T) film;
         }
     }
+
 }

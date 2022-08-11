@@ -29,7 +29,6 @@ public class UserService extends EntityService<User, Film> {
         return inMemoryUserStorage.getSameKindEntityMap();
     }
 
-
     @Override
     public void entityNotFoundCheck(String conclusion, int parentId, boolean isNotSameKindChild, int... childId) {
         inMemoryUserStorage.entityNotFoundCheck(conclusion, parentId, isNotSameKindChild, childId);
@@ -68,6 +67,5 @@ public class UserService extends EntityService<User, Film> {
                 "возвращён список общих друзей. Количество объектов " + commonFriendsList.size() + ".");
         return commonFriendsList;
     }
-
 
 }

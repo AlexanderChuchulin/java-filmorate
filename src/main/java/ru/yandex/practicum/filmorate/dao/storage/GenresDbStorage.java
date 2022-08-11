@@ -37,8 +37,10 @@ public class GenresDbStorage {
                     throw new EntityNotFoundException("Ошибка поиска объектов. " + excMsg);
                 }
             }
+
             log.info(name + " с id " + genreId[0] + " возвращён. Имя " + filmGenresMap.get(genreId[0]) + ".");
             return Map.of(genreId[0], filmGenresMap.get(genreId[0]));
         }
     }
+
 }

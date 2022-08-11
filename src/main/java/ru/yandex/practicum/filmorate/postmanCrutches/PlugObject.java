@@ -14,4 +14,5 @@ public class PlugObject {
         this.id = id;
         this.name = name;
     }
+
 }

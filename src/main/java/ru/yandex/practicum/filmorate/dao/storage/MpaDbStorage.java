@@ -41,4 +41,5 @@ public class MpaDbStorage {
             return Map.of(mpaId[0], mpaRatingMap.get(mpaId[0]));
         }
     }
+
 }

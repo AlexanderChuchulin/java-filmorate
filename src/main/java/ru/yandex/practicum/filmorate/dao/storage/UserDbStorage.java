@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 @Component
-public class UserDbStorage  extends EntityDbStorage<User, Film> {
+public class UserDbStorage extends EntityDbStorage<User, Film> {
 
     @Autowired
     public UserDbStorage(JdbcTemplate jdbcTemplate, InMemoryUserStorage inMemoryUserStorage) {
@@ -19,4 +19,5 @@ public class UserDbStorage  extends EntityDbStorage<User, Film> {
         otherKindDbTableName = "films";
         setMaxIdFromDb();
     }
+
 }

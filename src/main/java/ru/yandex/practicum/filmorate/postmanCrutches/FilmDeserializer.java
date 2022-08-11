@@ -13,6 +13,7 @@ import java.util.TreeSet;
 
 @JsonComponent
 public class FilmDeserializer extends JsonDeserializer<Film> {
+
     @SneakyThrows
     @Override
     public Film deserialize(JsonParser jsonParser, DeserializationContext desCon) {
@@ -27,16 +28,18 @@ public class FilmDeserializer extends JsonDeserializer<Film> {
         if (node.hasNonNull("name")) {
             name = node.get("name").asText();
         }
+
         if (node.hasNonNull("description")) {
             description = node.get("description").asText();
         }
+
         if (node.hasNonNull("releaseDate")) {
             releaseDate = LocalDate.parse(node.get("releaseDate").asText());
         }
+
         if (node.hasNonNull("duration")) {
             duration = node.get("duration").asInt();
         }
-
 
         film = Film.builder()
                 .filmName(name)
@@ -48,13 +51,15 @@ public class FilmDeserializer extends JsonDeserializer<Film> {
         if (node.hasNonNull("id")) {
             film.setId(node.get("id").asInt());
         }
+
         if (node.toString().contains("mpa")) {
-            if(node.hasNonNull("mpa")) {
+            if (node.hasNonNull("mpa")) {
                 film.setMpaRatingId(node.get("mpa").get("id").asInt());
             } else {
                 film.setMpaRatingId(-12345);
             }
         }
+
         if (node.hasNonNull("genres") && node.get("genres").size() > 0) {
             TreeSet<Integer> genreIdSet = new TreeSet<>();
 
@@ -65,4 +70,5 @@ public class FilmDeserializer extends JsonDeserializer<Film> {
         }
         return film;
     }
+
 }

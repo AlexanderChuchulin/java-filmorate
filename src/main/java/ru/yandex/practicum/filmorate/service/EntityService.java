@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.storage.InMemoryEntityStorage;
@@ -17,53 +18,48 @@ import java.util.Map;
 public abstract class EntityService<T extends Entity, V extends Entity> {
     String entityName;
     String actionName;
-    Map<Integer, LinkedHashSet<Integer>> sameKindEntityConnectionsMap = new HashMap<>();
-    Map<Integer, LinkedHashSet<Integer>> otherKindEntityConnectionsMap = new HashMap<>();
+    private final Map<Integer, LinkedHashSet<Integer>> sameKindEntityConnectionsMap = new HashMap<>();
+    private final Map<Integer, LinkedHashSet<Integer>> otherKindEntityConnectionsMap = new HashMap<>();
     Map<Integer, LinkedHashSet<Integer>> workingConnectionsMap = new HashMap<>();
     InMemoryEntityStorage<T, V> inMemoryStorage;
 
-    public Map<Integer, LinkedHashSet<Integer>> getWorkingConnectionsMap() {
-        return workingConnectionsMap;
-    }
-
+    @Autowired
     public EntityService(InMemoryUserStorage inMemoryUserStorage, InMemoryFilmStorage inMemoryFilmStorage) {
         inMemoryUserStorage.setOtherKindEntityMap(inMemoryFilmStorage.getSameKindEntityMap());
         inMemoryFilmStorage.setOtherKindEntityMap(inMemoryUserStorage.getSameKindEntityMap());
+    }
+
+    public Map<Integer, LinkedHashSet<Integer>> getWorkingConnectionsMap() {
+        return workingConnectionsMap;
     }
 
     public T createEntity(T entity) {
         return inMemoryStorage.createEntity(entity);
     }
 
-
     public T updateEntity(T entity) {
         return inMemoryStorage.updateEntity(entity);
     }
-
 
     public void deleteEntityById(int entityId) {
         inMemoryStorage.deleteEntityById(entityId);
     }
 
-
     public void deleteAllEntity() {
         inMemoryStorage.deleteAllEntity();
     }
-
 
     public Entity getEntityById(int entityId) {
         return inMemoryStorage.getEntityById(entityId);
     }
 
-
     public ArrayList<T> getAllEntity() {
         return inMemoryStorage.getAllEntity();
     }
 
-
-    // Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) -
-    // делает отметку о связи у обоих объектов если предполагается связь между разными видами сущностей (isNotSameKindEntity)
-    // - метод дополнительно работает и со второй таблицей связей
+/*    Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) -
+    делает отметку о связи у обоих объектов если предполагается связь между разными видами сущностей (isNotSameKindEntity)
+    метод дополнительно работает и со второй таблицей связей*/
     public void addConnection(int parentId, int childId, boolean isTwoWayConnection, boolean isNotSameKindEntity) {
         String conclusion = actionName + " не добавлен.";
 
@@ -92,15 +88,16 @@ public abstract class EntityService<T extends Entity, V extends Entity> {
             }
             workingConnectionsMap.get(childId).add(parentId);
         }
+
         log.info("Для объекта " + entityName + " с id " + parentId + " в память добавлен " +
                 actionName + " с id " + childId
                 + ". Количество связанных объектов для id " + parentId + " в памяти " +
                 workingConnectionsMap.get(parentId).size() + ".");
     }
 
-    // Метод добавляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) -
-    // удаляет отметку о связи у обоих объектов если предполагается связь между разными видами сущностей (isSameKindEntity)
-    // - метод дополнительно работает и со второй таблицей связей
+/*   Метод удаляет связь между объектами по id. Если связь двусторонняя (isTwoWayConnection) -
+    удаляет отметку о связи у обоих объектов если предполагается связь между разными видами сущностей (isSameKindEntity)
+    метод дополнительно работает и со второй таблицей связей*/
     public void removeConnection(int parentId, int childId, boolean isTwoWayConnection, boolean isNotSameKindEntity) {
         String excMsg = "Связь между " + entityName + " с id " + parentId + " и объектом с id " + childId +
                 ", который инициировал удаление " + actionName + " в памяти не найдена. ";
@@ -125,6 +122,7 @@ public abstract class EntityService<T extends Entity, V extends Entity> {
                 workingConnectionsMap.get(childId).remove(parentId);
             }
         }
+
         if (!isNotSameKindEntity && workingConnectionsMap.containsKey(parentId) &&
                 workingConnectionsMap.get(parentId).contains(childId)) {
             workingConnectionsMap.get(parentId).remove(childId);
@@ -138,4 +136,5 @@ public abstract class EntityService<T extends Entity, V extends Entity> {
     }
 
     public abstract void entityNotFoundCheck(String conclusion, int parentId, boolean isNotSameKindChild, int... childId);
+
 }

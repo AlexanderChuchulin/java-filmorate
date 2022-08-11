@@ -20,12 +20,13 @@ public class FilmMpaController {
     }
 
     @GetMapping
-    Map<Integer, String> getAllMpaController() {
+    private Map<Integer, String> getAllMpaController() {
         return mpaDbStorage.getFilmMpaDb();
     }
 
     @GetMapping("/{mpaId}")
-    Map<Integer, String> getMpaByIdController(@PathVariable int mpaId) {
+    private Map<Integer, String> getMpaByIdController(@PathVariable int mpaId) {
         return mpaDbStorage.getFilmMpaDb(mpaId);
     }
+
 }

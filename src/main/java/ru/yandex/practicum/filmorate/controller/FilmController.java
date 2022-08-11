@@ -20,17 +20,18 @@ public class FilmController extends StorageController<Film, User> {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    void addFilmLikeController(@PathVariable int filmId, @PathVariable int userId) {
+    private void addFilmLikeController(@PathVariable int filmId, @PathVariable int userId) {
         filmDbService.addConnectionDb(filmId, userId, false, true);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    void removeFilmLikeController(@PathVariable int filmId, @PathVariable int userId) {
-        filmDbService.removeConnectionDb(filmId, userId,false, true);
+    private void removeFilmLikeController(@PathVariable int filmId, @PathVariable int userId) {
+        filmDbService.removeConnectionDb(filmId, userId, false, true);
     }
 
     @GetMapping("/popular")
-    Collection<Film> getTopFilmsController(@RequestParam(required = false, defaultValue = "10") int count) {
+    private Collection<Film> getTopFilmsController(@RequestParam(required = false, defaultValue = "10") int count) {
         return filmDbService.getTopFilmsDb(count);
     }
+
 }

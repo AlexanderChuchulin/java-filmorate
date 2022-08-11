@@ -35,4 +35,5 @@ public class FilmSerializer extends JsonSerializer<Film> {
         jGen.writePOJOField("genres", genresObjList);
         jGen.writeEndObject();
     }
+
 }

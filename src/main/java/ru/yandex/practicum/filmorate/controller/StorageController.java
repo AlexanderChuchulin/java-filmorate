@@ -16,27 +16,27 @@ public abstract class StorageController<T extends Entity, V extends Entity> {
     }
 
     @PutMapping
-    public Entity updateEntityController(@RequestBody T entity) {
+    private Entity updateEntityController(@RequestBody T entity) {
         return dbService.updateEntityDb(entity);
     }
 
     @DeleteMapping("/{entityId}")
-    public void deleteEntityByIdController(@PathVariable int entityId) {
+    private void deleteEntityByIdController(@PathVariable int entityId) {
         dbService.deleteEntityByIdDb(entityId);
     }
 
     @DeleteMapping
-    public void deleteAllEntityController() {
+    private void deleteAllEntityController() {
         dbService.deleteAllEntityDb();
     }
 
     @GetMapping("/{entityId}")
-    public Entity getEntityByIdController(@PathVariable int entityId) {
+    private Entity getEntityByIdController(@PathVariable int entityId) {
         return dbService.getEntityByIdDb(entityId);
     }
 
     @GetMapping
-    public ArrayList<T> getAllEntityController() {
+    private ArrayList<T> getAllEntityController() {
         return dbService.getAllEntityDb();
     }
 

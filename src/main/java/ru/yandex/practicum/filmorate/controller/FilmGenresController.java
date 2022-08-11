@@ -20,12 +20,12 @@ public class FilmGenresController {
     }
 
     @GetMapping
-    Map<Integer, String> getAllGenresController() {
+    private Map<Integer, String> getAllGenresController() {
         return genresDbStorage.getFilmGenres();
     }
 
     @GetMapping("/{genreId}")
-    Map<Integer, String> getGenreByIdController(@PathVariable int genreId) {
+    private Map<Integer, String> getGenreByIdController(@PathVariable int genreId) {
         return genresDbStorage.getFilmGenres(genreId);
     }
 

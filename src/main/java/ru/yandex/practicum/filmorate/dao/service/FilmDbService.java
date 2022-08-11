@@ -13,7 +13,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class FilmDbService extends EntityDbService <Film, User> {
+public class FilmDbService extends EntityDbService<Film, User> {
 
     @Autowired
     public FilmDbService(FilmDbStorage filmDbStorage, FilmService filmService) {
@@ -31,19 +31,24 @@ public class FilmDbService extends EntityDbService <Film, User> {
 
         sql = String.format("SELECT COUNT(*) FROM \"%s\"", "films");
         rowCount = EntityDbStorage.getJdbcTemplate().queryForObject(sql, Integer.class);
+        log.info("База данных таблица - films. Количество строк в базе " + rowCount + ".");
+
         sql = "SELECT COUNT (DISTINCT likes.\"film_id\") FROM \"film_user_likes\" AS likes";
         likeCount = EntityDbStorage.getJdbcTemplate().queryForObject(sql, Integer.class);
-        log.info("База данных таблица - films. Количество строк в базе " + rowCount + ".");
+
 
         if (rowCount > 0) {
             sql = String.format("SELECT \"films\".* FROM \"films\" LEFT OUTER JOIN \"film_user_likes\" AS likes " +
                     "ON likes.\"film_id\" = \"films\".\"film_id\" GROUP BY \"films\".\"film_id\" " +
                     "ORDER BY COUNT(likes.\"film_id\") DESC LIMIT %s", limit);
+
             EntityDbStorage.getJdbcTemplate().query(sql, (resSet, rowNum)
                     -> topFilmsList.add(dbStorage.convertResSetToEntity(resSet, false)));
+
             log.info("Из БД Возвращён топ " + limit + " фильмов по количеству лайков. Размер списка: "
                     + topFilmsList.size() + ". Всего фильмов с оценками: " + likeCount + ".");
         }
         return topFilmsList;
     }
+
 }

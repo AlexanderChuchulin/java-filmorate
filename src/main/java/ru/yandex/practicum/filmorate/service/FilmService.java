@@ -24,17 +24,14 @@ public class FilmService extends EntityService<Film, User> {
         actionName = inMemoryFilmStorage.getActionName();
     }
 
-
     public Map<Integer, Film> getSameKindEntityMap() {
         return inMemoryFilmStorage.getSameKindEntityMap();
     }
-
 
     @Override
     public void entityNotFoundCheck(String conclusion, int parentId, boolean isNotSameKindChild, int... childId) {
         inMemoryFilmStorage.entityNotFoundCheck(conclusion, parentId, isNotSameKindChild, childId);
     }
-
 
     public Map<Integer, String> getFilmMpaGenres(boolean isMpa, int... propId) {
         return inMemoryFilmStorage.getFilmMpaGenres(isMpa, propId);
@@ -55,6 +52,7 @@ public class FilmService extends EntityService<Film, User> {
             if (!workingConnectionsMap.containsKey(filmId)) {
                 workingConnectionsMap.put(filmId, new LinkedHashSet<>());
             }
+
             if (workingConnectionsMap.get(filmId).isEmpty()) {
                 filmsWithoutLikesCount++;
             }
@@ -68,7 +66,6 @@ public class FilmService extends EntityService<Film, User> {
 
         log.info("Возвращён топ " + limit + " фильмов по количеству лайков. Размер списка: " + topFilmsList.size()
                 + ". Из них фильмов с оценками: " + (topFilmsList.size() - filmsWithoutLikesCount) + ".");
-
         return topFilmsList;
     }
 

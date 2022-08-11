@@ -16,4 +16,5 @@ public class User extends Entity {
     private String userName;
     private String email;
     private LocalDate birthday;
+
 }

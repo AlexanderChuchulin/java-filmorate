@@ -24,12 +24,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 class FilmorateApplicationTests {
-
     private final UserService userService;
     private final FilmService filmService;
     private final UserDbService userDbService;
     private final FilmDbService filmDbService;
-
 
     @Autowired
     public FilmorateApplicationTests(UserService userService, FilmService filmService,
@@ -39,7 +37,6 @@ class FilmorateApplicationTests {
         this.userDbService = userDbService;
         this.filmDbService = filmDbService;
     }
-
 
     // Тесты UserService и UserDbService
     @SneakyThrows
@@ -326,7 +323,7 @@ class FilmorateApplicationTests {
                         userService.getSameKindEntityMap().get(3)), userService.getAllEntity(),
                 "Возвращаемые объекты всех пользователей не совпадает");
         assertEquals(List.of(userService.getSameKindEntityMap().get(1), userService.getSameKindEntityMap().get(2),
-                userService.getSameKindEntityMap().get(3)), userDbService.getAllEntityDb(),
+                        userService.getSameKindEntityMap().get(3)), userDbService.getAllEntityDb(),
                 "Возвращаемые объекты всех пользователей из БД не совпадает");
 
         // тесты работы в БД со связями пользователей тип друзья
@@ -391,14 +388,12 @@ class FilmorateApplicationTests {
                 "После удаления из БД пользователя с id 1 при попытке получить по id его друзей не выброшено исключение");
         assertThrows(EntityNotFoundException.class, () -> userDbService.getCommonFriendsDb(1, 2),
                 "После удаления из БД пользователя с id 1 при попытке получить общих друзей по его id и id 2 не выброшено исключение");
-
     }
 
     // Тесты FilmService и FilmDbService
     @SneakyThrows
     @Test
     void filmControllerShouldBeCreateUpdateAndGetAllFilms() {
-
         String filmName = "nameFilm1";
         String filmDescription = "descFilm1";
         LocalDate filmReleaseDate = LocalDate.of(1991, 1, 1);
@@ -472,7 +467,7 @@ class FilmorateApplicationTests {
                 .description(filmDescription)
                 .releaseDate(filmReleaseDate)
                 .duration(filmDuration)
-                .genreIdSet(new TreeSet<>(Set.of(1, 2 ,3)))
+                .genreIdSet(new TreeSet<>(Set.of(1, 2, 3)))
                 .build();
 
         filmDbService.createEntityDb(filmWithGenres);
@@ -481,7 +476,7 @@ class FilmorateApplicationTests {
                 "После создания третьего фильма с жанрами и без MPA, в БД не три фильма");
         assertEquals(0, filmService.getSameKindEntityMap().get(3).getMpaRatingId(),
                 "После создания третьего фильма с жанрами и без MPA, MPA не 0");
-        assertEquals(Set.of(1, 2 ,3), filmService.getSameKindEntityMap().get(3).getGenreIdSet(),
+        assertEquals(Set.of(1, 2, 3), filmService.getSameKindEntityMap().get(3).getGenreIdSet(),
                 "После создания третьего фильма с жанрами и без MPA, id жанров не соответствуют 1, 2, 3");
 
         // Тесты на валидацию при создании фильмов с выбросом исключений
@@ -564,7 +559,7 @@ class FilmorateApplicationTests {
                 .description(filmDescription)
                 .releaseDate(filmReleaseDate)
                 .duration(filmDuration)
-                .genreIdSet(new TreeSet<>(Set.of(-1, 2 ,3)))
+                .genreIdSet(new TreeSet<>(Set.of(-1, 2, 3)))
                 .build();
 
 
@@ -622,7 +617,7 @@ class FilmorateApplicationTests {
         assertEquals(updatingFilmDuration, filmFromMap.getDuration(),
                 "Обновлённая длительность фильма не совпадает");
         assertTrue(filmDbService.getAllEntityDb().contains(film1),
-                "Обновлённый фильм с id " + film1.getId() +  " не найден в БД");
+                "Обновлённый фильм с id " + film1.getId() + " не найден в БД");
 
         // тест на проверку ошибочного id обновляемого фильма
         filmId = -1;
@@ -654,7 +649,7 @@ class FilmorateApplicationTests {
                 .releaseDate(updatingFilmReleaseDate)
                 .duration(updatingFilmDuration)
                 .mpaRatingId(-1)
-                .genreIdSet(new TreeSet<>(Set.of(-1, 2 ,3)))
+                .genreIdSet(new TreeSet<>(Set.of(-1, 2, 3)))
                 .build();
         failFilm.setId(filmId);
 
@@ -721,7 +716,6 @@ class FilmorateApplicationTests {
         assertEquals(List.of(filmService.getSameKindEntityMap().get(1), filmService.getSameKindEntityMap().get(2)),
                 filmDbService.getTopFilmsDb(5), "После удаления из БД фильма с id 3, " +
                         "возвращаемый топ 5 не соответствует новой последовательности id 1, 2");
-
-
     }
+
 }

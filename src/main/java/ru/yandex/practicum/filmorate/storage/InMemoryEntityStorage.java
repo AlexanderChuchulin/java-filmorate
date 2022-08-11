@@ -12,7 +12,6 @@ import java.util.Map;
 
 @Slf4j
 public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> implements EntityStorage<T> {
-
     private int startId;
     String entityName;
     String actionName;
@@ -63,6 +62,7 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
         validateEntity(entity, false, conclusion);
         entity.setId(generateId());
         sameKindEntityMap.put(entity.getId(), entity);
+
         log.info("В памяти создан " + entityName + " с id " + entity.getId() + ". " + entity);
         return entity;
     }
@@ -84,10 +84,12 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
         Entity entity = sameKindEntityMap.get(entityId);
 
         entityNotFoundCheck(conclusion, entityId, false);
+
         if (entity.getClass() == User.class) {
             User user = (User) entity;
             entityMainPropMap.remove(user.getLogin());
         }
+
         if (entity.getClass() == Film.class) {
             Film film = (Film) entity;
             entityMainPropMap.remove(film.getFilmName() + ";" + film.getReleaseDate());
@@ -130,6 +132,7 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
                 }
             }
         }
+
         id++;
         setStartId(id);
         return id;
@@ -146,15 +149,18 @@ public abstract class InMemoryEntityStorage<T extends Entity, V extends Entity> 
         } else {
             childCheckMap = getSameKindEntityMap();
         }
+
         if (!sameKindEntityMap.containsKey(parentId)) {
             excMsg = "Целевой объект " + entityName + " с id " + parentId + " в памяти не найден. ";
         }
+
         if (childId.length == 1) {
             if (!childCheckMap.containsKey(childId[0])) {
                 excMsg += "Объект с id " + childId[0] + ", который инициировал действие связанное с " +
                         actionName + " в памяти не найден. ";
             }
         }
+
         if (excMsg.length() > 0) {
             log.warn("Ошибка поиска объектов. " + excMsg + conclusion);
             throw new EntityNotFoundException(excMsg + conclusion);

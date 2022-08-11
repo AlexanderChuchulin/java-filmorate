@@ -19,24 +19,24 @@ public class UserController extends StorageController<User, Film> {
         dbService = userDbService;
     }
 
-
     @PutMapping("/{userId}/friends/{friendId}")
-    void addFriendController(@PathVariable int userId, @PathVariable int friendId) {
+    private void addFriendController(@PathVariable int userId, @PathVariable int friendId) {
         userDbService.addConnectionDb(userId, friendId, false, false);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    void removeFriendController(@PathVariable int userId, @PathVariable int friendId) {
+    private void removeFriendController(@PathVariable int userId, @PathVariable int friendId) {
         userDbService.removeConnectionDb(userId, friendId, false, false);
     }
 
     @GetMapping("/{userId}/friends")
-    ArrayList<User> getAllFriendsController(@PathVariable int userId) {
+    private ArrayList<User> getAllFriendsController(@PathVariable int userId) {
         return userDbService.getFriendsByUserIdDb(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherUserId}")
-    ArrayList<User> getCommonFriendsController(@PathVariable int userId, @PathVariable int otherUserId) {
+    private ArrayList<User> getCommonFriendsController(@PathVariable int userId, @PathVariable int otherUserId) {
         return userDbService.getCommonFriendsDb(userId, otherUserId);
     }
+
 }

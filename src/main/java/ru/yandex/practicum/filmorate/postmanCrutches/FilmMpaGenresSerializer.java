@@ -22,10 +22,12 @@ public class FilmMpaGenresSerializer extends JsonSerializer<Map<Integer, String>
                 addPropObjList.add(new PlugObject(addPropId, addPropMap.get(addPropId)));
             }
         }
+
         if (addPropObjList.size() > 1) {
             jGen.writePOJO(addPropObjList);
         } else {
             jGen.writePOJO(addPropObjList.get(0));
         }
     }
+
 }
